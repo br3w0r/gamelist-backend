@@ -13,3 +13,9 @@
 
 # Dependency directories
 vendor/
+
+# Database
+*.db
+
+# Debug file
+__debug_bin

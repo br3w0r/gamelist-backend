@@ -26,11 +26,11 @@ type gameListRepository struct {
 	db *gorm.DB
 }
 
-func NewGamelistRepository(dbName string) GamelistRepository {
+func NewGamelistRepository(dbName string, forceMigrate bool) GamelistRepository {
 	var db *gorm.DB
 	_, err := os.Stat(dbName)
 
-	if os.IsNotExist(err) {
+	if os.IsNotExist(err) || forceMigrate {
 		db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
 		if err != nil {
 			panic("Failed to connect database.")

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"net/http"
 
 	"bitbucket.org/br3w0r/gamelist-backend/controller"
@@ -10,9 +12,15 @@ import (
 )
 
 func main() {
+	migrate := flag.Bool("migrate", false, "Force AutoMigrate if true")
+	flag.Parse()
+
+	if *migrate {
+		fmt.Println("Force migration.")
+	}
 
 	var (
-		gamelistRepository                               = repository.NewGamelistRepository("gamelist.db")
+		gamelistRepository                               = repository.NewGamelistRepository("gamelist.db", *migrate)
 		gamelistService    service.GameListService       = service.NewGameListService(gamelistRepository)
 		gamelistController controller.GameListController = controller.NewGameListController(gamelistService)
 	)

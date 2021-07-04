@@ -49,7 +49,19 @@ func NewGamelistRepository(dbName string, forceMigrate bool) GamelistRepository 
 }
 
 func (r *gameListRepository) SaveGame(game entity.GameProperties) error {
-	return r.db.Model(&entity.GameProperties{}).Save(&game).Error
+	for i := range game.Platforms {
+		err := r.db.First(&game.Platforms[i], game.Platforms[i]).Error
+		if err != nil && err != gorm.ErrRecordNotFound {
+			return err
+		}
+	}
+	for i := range game.Genres {
+		err := r.db.First(&game.Genres[i], game.Genres[i]).Error
+		if err != nil && err != gorm.ErrRecordNotFound {
+			return err
+		}
+	}
+	return r.db.Save(&game).Error
 }
 
 func (r *gameListRepository) GetAllGames() []entity.GameProperties {

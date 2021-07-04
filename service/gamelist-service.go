@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"log"
+	"time"
 
 	"bitbucket.org/br3w0r/gamelist-backend/entity"
 	pb "bitbucket.org/br3w0r/gamelist-backend/proto"
@@ -78,6 +79,7 @@ func (s *gameListService) ScrapeGames() {
 	}
 
 	counter := 1
+	t := time.Now()
 	for {
 		log.Printf("Adding game: %d", counter)
 		game, err := stream.Recv()
@@ -92,4 +94,5 @@ func (s *gameListService) ScrapeGames() {
 		s.repo.SaveGame(game.ConvertToEntity())
 		counter++
 	}
+	log.Printf("Time elapsed: %v", time.Since(t))
 }

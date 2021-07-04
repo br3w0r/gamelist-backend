@@ -39,6 +39,11 @@ func main() {
 	server.Static("/js", "../gamelist-frontend/gamelist/dist/js")
 	server.LoadHTMLGlob("../gamelist-frontend/gamelist/dist/*.html")
 
+	// For SPA on vue
+	server.NoRoute(func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "index.html", nil)
+	})
+
 	apiRoutes := server.Group("/api/v0")
 	{
 		apiRoutes.GET("/games/all", gamelistController.GetAllGames)
@@ -49,13 +54,6 @@ func main() {
 
 		apiRoutes.GET("/platforms", gamelistController.GetAllPlatforms) // This will be replaced with gRPC call
 		apiRoutes.POST("/platforms", gamelistController.PostPlatform)   // This will be replaced with gRPC call
-	}
-
-	viewRoutes := server.Group("/")
-	{
-		viewRoutes.GET("/", func(ctx *gin.Context) {
-			ctx.HTML(http.StatusOK, "index.html", nil)
-		})
 	}
 
 	server.Run(":8080")

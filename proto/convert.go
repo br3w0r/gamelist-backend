@@ -1,9 +1,8 @@
 package proto
 
 import (
-	"math"
-
 	"bitbucket.org/br3w0r/gamelist-backend/entity"
+	"bitbucket.org/br3w0r/gamelist-backend/helpers"
 )
 
 func (g *GameProperties) ConvertToEntity() entity.GameProperties {
@@ -13,7 +12,7 @@ func (g *GameProperties) ConvertToEntity() entity.GameProperties {
 	platforms := make([]entity.Platform, nPlatforms)
 	genres := make([]entity.Genre, nGenres)
 
-	maxIter := int(math.Max(float64(nPlatforms), float64(nGenres)))
+	maxIter := helpers.MaxInt(nPlatforms, nGenres)
 	for i := 0; i < maxIter; i++ {
 		if i < nPlatforms {
 			platforms[i] = entity.Platform{Name: g.Platforms[i].Name}

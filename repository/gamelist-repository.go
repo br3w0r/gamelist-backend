@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"encoding/json"
-	"errors"
 	"os"
 
 	"bitbucket.org/br3w0r/gamelist-backend/entity"
@@ -51,26 +49,6 @@ func NewGamelistRepository(dbName string, forceMigrate bool) GamelistRepository 
 }
 
 func (r *gameListRepository) SaveGame(game entity.GameProperties) error {
-	for i := range game.Platforms {
-		err := r.db.First(&game.Platforms[i], game.Platforms[i]).Error
-		if err != nil {
-			if err == gorm.ErrRecordNotFound {
-				out, _ := json.Marshal(&game.Platforms[i])
-				return errors.New("Can't find platform: " + string(out))
-			}
-			return err
-		}
-	}
-	for i := range game.Genres {
-		err := r.db.First(&game.Genres[i], game.Genres[i]).Error
-		if err != nil {
-			if err == gorm.ErrRecordNotFound {
-				out, _ := json.Marshal(&game.Genres[i])
-				return errors.New("Can't find genre: " + string(out))
-			}
-			return err
-		}
-	}
 	return r.db.Save(&game).Error
 }
 

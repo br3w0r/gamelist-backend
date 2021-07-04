@@ -49,7 +49,7 @@ func NewGamelistRepository(dbName string, forceMigrate bool) GamelistRepository 
 }
 
 func (r *gameListRepository) SaveGame(game entity.GameProperties) error {
-	return r.db.Save(&game).Error
+	return r.db.Model(&entity.GameProperties{}).Save(&game).Error
 }
 
 func (r *gameListRepository) GetAllGames() []entity.GameProperties {

@@ -1,8 +1,14 @@
 package service
 
 import (
+	"context"
+	"io"
+	"log"
+
 	"bitbucket.org/br3w0r/gamelist-backend/entity"
+	pb "bitbucket.org/br3w0r/gamelist-backend/proto"
 	"bitbucket.org/br3w0r/gamelist-backend/repository"
+	"google.golang.org/grpc"
 )
 
 type GameListService interface {
@@ -14,6 +20,9 @@ type GameListService interface {
 
 	SavePlatform(platform entity.Platform) error
 	GetAllPlatforms() []entity.Platform
+
+	// gRPC
+	ScrapeGames()
 }
 
 type gameListService struct {
@@ -46,4 +55,41 @@ func (s *gameListService) SavePlatform(platform entity.Platform) error {
 
 func (s *gameListService) GetAllPlatforms() []entity.Platform {
 	return s.repo.GetAllPlatforms()
+}
+
+// gRPC
+func (s *gameListService) ScrapeGames() {
+	// Connection
+	opts := []grpc.DialOption{grpc.WithInsecure(), grpc.WithBlock()}
+
+	conn, err := grpc.Dial("localhost:8888", opts...)
+	if err != nil {
+		log.Printf("failed to dial: %v", err)
+		return
+	}
+	defer conn.Close()
+	client := pb.NewGameScrapeClient(conn)
+
+	// Getting games from scraper
+	stream, err := client.ScrapeGames(context.Background(), &pb.Empty{})
+	if err != nil {
+		log.Printf("<ScrapeGames>: failed to set up stream: %v", err)
+		return
+	}
+
+	counter := 1
+	for {
+		log.Printf("Adding game: %d", counter)
+		game, err := stream.Recv()
+
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			log.Printf("rpc error: %v", err)
+			return
+		}
+
+		s.repo.SaveGame(game.ConvertToEntity())
+		counter++
+	}
 }

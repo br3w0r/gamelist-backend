@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"log"
 	"net/http"
 
 	"bitbucket.org/br3w0r/gamelist-backend/controller"
@@ -12,11 +12,14 @@ import (
 )
 
 func main() {
-	migrate := flag.Bool("migrate", false, "Force AutoMigrate if true")
+	var (
+		migrate     *bool = flag.Bool("migrate", false, "Force AutoMigrate if true")
+		forceScrape *bool = flag.Bool("force-scrape", false, "Force all games scraping")
+	)
 	flag.Parse()
 
 	if *migrate {
-		fmt.Println("Force migration.")
+		log.Println("Force migration.")
 	}
 
 	var (
@@ -24,6 +27,11 @@ func main() {
 		gamelistService    service.GameListService       = service.NewGameListService(gamelistRepository)
 		gamelistController controller.GameListController = controller.NewGameListController(gamelistService)
 	)
+
+	if *forceScrape {
+		log.Println("Force scraping.")
+		go gamelistService.ScrapeGames()
+	}
 
 	server := gin.Default()
 

@@ -33,7 +33,7 @@ type Platform struct {
 
 type ProfileInfo struct {
 	Model
-	Nickname    string   `gorm:"varchar(20)" json:"nickname" binding:"gte=2,lte=20"`
+	Nickname    string   `gorm:"varchar(20);unique" json:"nickname" binding:"gte=2,lte=20"`
 	Description string   `gorm:"varchar(120)" json:"description" binding:"lte=120"`
 	GamesListed uint     `json:"games_listed"`
 	Socials     []Social `gorm:"foreignKey:ProfileID"`

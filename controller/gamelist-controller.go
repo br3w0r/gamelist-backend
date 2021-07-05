@@ -60,7 +60,7 @@ func (c *gameListController) GetAllPlatforms(ctx *gin.Context) {
 }
 
 func (c *gameListController) PostProfile(ctx *gin.Context) {
-	GenericPost(ctx, &entity.ProfileInfo{}, c.service.SaveProfile)
+	GenericPost(ctx, &entity.ProfileInfo{}, c.service.CreateProfile)
 }
 
 func (c *gameListController) GetAllProfiles(ctx *gin.Context) {

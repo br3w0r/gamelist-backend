@@ -22,6 +22,7 @@ type GameListService interface {
 	SavePlatform(platform entity.Platform) error
 	GetAllPlatforms() []entity.Platform
 
+	CreateProfile(profile entity.ProfileInfo) error
 	SaveProfile(profile entity.ProfileInfo) error
 	GetAllProfiles() []entity.ProfileInfo
 
@@ -62,6 +63,10 @@ func (s *gameListService) SavePlatform(platform entity.Platform) error {
 
 func (s *gameListService) GetAllPlatforms() []entity.Platform {
 	return s.repo.GetAllPlatforms()
+}
+
+func (s *gameListService) CreateProfile(profile entity.ProfileInfo) error {
+	return s.repo.CreateProfile(profile)
 }
 
 func (s *gameListService) SaveProfile(profile entity.ProfileInfo) error {

@@ -20,6 +20,7 @@ type GamelistRepository interface {
 	SavePlatform(platform entity.Platform) error
 	GetAllPlatforms() []entity.Platform
 
+	CreateProfile(profile entity.ProfileInfo) error
 	SaveProfile(profile entity.ProfileInfo) error
 	GetAllProfiles() []entity.ProfileInfo
 
@@ -97,7 +98,7 @@ func (r *gameListRepository) GetAllPlatforms() []entity.Platform {
 	return platforms
 }
 
-func (r *gameListRepository) SaveProfile(profile entity.ProfileInfo) error {
+func (r *gameListRepository) CreateProfile(profile entity.ProfileInfo) error {
 	// TODO: add socials binding
 	for i := range profile.Socials {
 		err := r.db.First(&entity.SocialType{}, profile.Socials[i].TypeID).Error
@@ -109,6 +110,12 @@ func (r *gameListRepository) SaveProfile(profile entity.ProfileInfo) error {
 		}
 	}
 
+	profile.GamesListed = 0
+
+	return r.db.Create(&profile).Error
+}
+
+func (r *gameListRepository) SaveProfile(profile entity.ProfileInfo) error {
 	return r.db.Save(&profile).Error
 }
 

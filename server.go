@@ -47,13 +47,21 @@ func main() {
 	apiRoutes := server.Group("/api/v0")
 	{
 		apiRoutes.GET("/games/all", gamelistController.GetAllGames)
-		apiRoutes.POST("/games", gamelistController.PostGame) // This will be replaced with gRPC call
 
-		apiRoutes.GET("/genres", gamelistController.GetAllGenres) // This will be replaced with gRPC call
-		apiRoutes.POST("/genres", gamelistController.PostGenre)   // This will be replaced with gRPC call
+		// This will be replaced with gRPC call
+		apiRoutes.POST("/games", gamelistController.PostGame)
 
-		apiRoutes.GET("/platforms", gamelistController.GetAllPlatforms) // This will be replaced with gRPC call
-		apiRoutes.POST("/platforms", gamelistController.PostPlatform)   // This will be replaced with gRPC call
+		apiRoutes.GET("/genres", gamelistController.GetAllGenres)
+		apiRoutes.POST("/genres", gamelistController.PostGenre)
+
+		apiRoutes.GET("/platforms", gamelistController.GetAllPlatforms)
+		apiRoutes.POST("/platforms", gamelistController.PostPlatform)
+
+		apiRoutes.GET("/profiles", gamelistController.GetAllProfiles)
+		apiRoutes.POST("/profiles", gamelistController.PostProfile)
+
+		apiRoutes.GET("/social-types", gamelistController.GetAllSocialtypes)
+		apiRoutes.POST("/social-types", gamelistController.PostSocialType)
 	}
 
 	server.Run(":8080")

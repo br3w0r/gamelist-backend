@@ -22,6 +22,12 @@ type GameListService interface {
 	SavePlatform(platform entity.Platform) error
 	GetAllPlatforms() []entity.Platform
 
+	SaveProfile(profile entity.ProfileInfo) error
+	GetAllProfiles() []entity.ProfileInfo
+
+	SaveSocialType(socialType entity.SocialType) error
+	GetAllSocialTypes() []entity.SocialType
+
 	// gRPC
 	ScrapeGames()
 }
@@ -56,6 +62,22 @@ func (s *gameListService) SavePlatform(platform entity.Platform) error {
 
 func (s *gameListService) GetAllPlatforms() []entity.Platform {
 	return s.repo.GetAllPlatforms()
+}
+
+func (s *gameListService) SaveProfile(profile entity.ProfileInfo) error {
+	return s.repo.SaveProfile(profile)
+}
+
+func (s *gameListService) GetAllProfiles() []entity.ProfileInfo {
+	return s.repo.GetAllProfiles()
+}
+
+func (s *gameListService) SaveSocialType(socialType entity.SocialType) error {
+	return s.repo.SaveSocialType(socialType)
+}
+
+func (s *gameListService) GetAllSocialTypes() []entity.SocialType {
+	return s.repo.GetAllSocialTypes()
 }
 
 // gRPC

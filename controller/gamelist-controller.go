@@ -9,14 +9,22 @@ import (
 )
 
 type GameListController interface {
-	PostGame(ctx *gin.Context) // Will be replaced with gRPC calls
 	GetAllGames(ctx *gin.Context)
 
-	PostGenre(ctx *gin.Context)    // Will be replaced with gRPC calls
-	GetAllGenres(ctx *gin.Context) // Will be replaced with gRPC calls
+	// Will be replaced with gRPC calls
+	PostGame(ctx *gin.Context)
 
-	PostPlatform(ctx *gin.Context)    // Will be replaced with gRPC calls
-	GetAllPlatforms(ctx *gin.Context) // Will be replaced with gRPC calls
+	PostGenre(ctx *gin.Context)
+	GetAllGenres(ctx *gin.Context)
+
+	PostPlatform(ctx *gin.Context)
+	GetAllPlatforms(ctx *gin.Context)
+
+	PostProfile(ctx *gin.Context)
+	GetAllProfiles(ctx *gin.Context)
+
+	PostSocialType(ctx *gin.Context)
+	GetAllSocialtypes(ctx *gin.Context)
 }
 
 type gameListController struct {
@@ -49,4 +57,20 @@ func (c *gameListController) PostPlatform(ctx *gin.Context) {
 
 func (c *gameListController) GetAllPlatforms(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, c.service.GetAllPlatforms())
+}
+
+func (c *gameListController) PostProfile(ctx *gin.Context) {
+	GenericPost(ctx, &entity.ProfileInfo{}, c.service.SaveProfile)
+}
+
+func (c *gameListController) GetAllProfiles(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, c.service.GetAllProfiles())
+}
+
+func (c *gameListController) PostSocialType(ctx *gin.Context) {
+	GenericPost(ctx, &entity.SocialType{}, c.service.SaveSocialType)
+}
+
+func (c *gameListController) GetAllSocialtypes(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, c.service.GetAllSocialTypes())
 }

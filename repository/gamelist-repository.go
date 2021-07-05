@@ -18,6 +18,12 @@ type GamelistRepository interface {
 
 	SavePlatform(platform entity.Platform) error
 	GetAllPlatforms() []entity.Platform
+
+	SaveProfile(profile entity.ProfileInfo) error
+	GetAllProfiles() []entity.ProfileInfo
+
+	SaveSocialType(socialType entity.SocialType) error
+	GetAllSocialTypes() []entity.SocialType
 }
 
 type gameListRepository struct {
@@ -88,4 +94,25 @@ func (r *gameListRepository) GetAllPlatforms() []entity.Platform {
 	var platforms []entity.Platform
 	r.db.Find(&platforms)
 	return platforms
+}
+
+func (r *gameListRepository) SaveProfile(profile entity.ProfileInfo) error {
+	// TODO: add socials binding
+	return r.db.Save(&profile).Error
+}
+
+func (r *gameListRepository) GetAllProfiles() []entity.ProfileInfo {
+	var profiles []entity.ProfileInfo
+	r.db.Preload(clause.Associations).Find(&profiles)
+	return profiles
+}
+
+func (r *gameListRepository) SaveSocialType(socialType entity.SocialType) error {
+	return r.db.Save(&socialType).Error
+}
+
+func (r *gameListRepository) GetAllSocialTypes() []entity.SocialType {
+	var socialTypes []entity.SocialType
+	r.db.Find(&socialTypes)
+	return socialTypes
 }

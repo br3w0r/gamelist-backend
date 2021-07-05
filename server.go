@@ -60,6 +60,8 @@ func main() {
 		apiRoutes.GET("/profiles", gamelistController.GetAllProfiles)
 		apiRoutes.POST("/profiles", gamelistController.PostProfile)
 
+		apiRoutes.POST("/login-check", gamelistController.CheckLogin)
+
 		apiRoutes.GET("/social-types", gamelistController.GetAllSocialtypes)
 		apiRoutes.POST("/social-types", gamelistController.PostSocialType)
 	}

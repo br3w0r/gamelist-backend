@@ -20,9 +20,10 @@ type GamelistRepository interface {
 	SavePlatform(platform entity.Platform) error
 	GetAllPlatforms() []entity.Platform
 
-	CreateProfile(profile entity.ProfileInfo) error
-	SaveProfile(profile entity.ProfileInfo) error
+	CreateProfile(profile entity.Profile) error
+	SaveProfile(profile entity.Profile) error
 	GetAllProfiles() []entity.ProfileInfo
+	GetProfile(nickname string) (*entity.Profile, error)
 
 	SaveSocialType(socialType entity.SocialType) error
 	GetAllSocialTypes() []entity.SocialType
@@ -42,7 +43,7 @@ func NewGamelistRepository(dbName string, forceMigrate bool) GamelistRepository 
 			panic("Failed to connect database.")
 		}
 		db.AutoMigrate(&entity.GameProperties{}, &entity.Genre{},
-			&entity.Platform{}, &entity.ProfileInfo{}, &entity.Social{},
+			&entity.Platform{}, &entity.Profile{}, &entity.Social{},
 			&entity.SocialType{}, &entity.ProfileGames{}, &entity.ListType{})
 	} else {
 		db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
@@ -98,8 +99,7 @@ func (r *gameListRepository) GetAllPlatforms() []entity.Platform {
 	return platforms
 }
 
-func (r *gameListRepository) CreateProfile(profile entity.ProfileInfo) error {
-	// TODO: add socials binding
+func (r *gameListRepository) CreateProfile(profile entity.Profile) error {
 	for i := range profile.Socials {
 		err := r.db.First(&entity.SocialType{}, profile.Socials[i].TypeID).Error
 		if err == gorm.ErrRecordNotFound {
@@ -115,14 +115,23 @@ func (r *gameListRepository) CreateProfile(profile entity.ProfileInfo) error {
 	return r.db.Create(&profile).Error
 }
 
-func (r *gameListRepository) SaveProfile(profile entity.ProfileInfo) error {
+func (r *gameListRepository) SaveProfile(profile entity.Profile) error {
 	return r.db.Save(&profile).Error
 }
 
 func (r *gameListRepository) GetAllProfiles() []entity.ProfileInfo {
 	var profiles []entity.ProfileInfo
-	r.db.Preload(clause.Associations).Find(&profiles)
+	r.db.Model(&entity.Profile{}).Find(&profiles)
 	return profiles
+}
+
+func (r *gameListRepository) GetProfile(nickname string) (*entity.Profile, error) {
+	var profile entity.Profile
+	err := r.db.First(&profile, map[string]string{"nickname": nickname}).Error
+	if err != nil {
+		return nil, err
+	}
+	return &profile, nil
 }
 
 func (r *gameListRepository) SaveSocialType(socialType entity.SocialType) error {

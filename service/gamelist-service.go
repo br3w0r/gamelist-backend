@@ -9,6 +9,7 @@ import (
 	"bitbucket.org/br3w0r/gamelist-backend/entity"
 	pb "bitbucket.org/br3w0r/gamelist-backend/proto"
 	"bitbucket.org/br3w0r/gamelist-backend/repository"
+	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 )
 
@@ -22,9 +23,10 @@ type GameListService interface {
 	SavePlatform(platform entity.Platform) error
 	GetAllPlatforms() []entity.Platform
 
-	CreateProfile(profile entity.ProfileInfo) error
-	SaveProfile(profile entity.ProfileInfo) error
+	CreateProfile(profile entity.Profile) error
+	SaveProfile(profile entity.Profile) error
 	GetAllProfiles() []entity.ProfileInfo
+	CheckLogin(login entity.LoginProfile) bool
 
 	SaveSocialType(socialType entity.SocialType) error
 	GetAllSocialTypes() []entity.SocialType
@@ -65,16 +67,46 @@ func (s *gameListService) GetAllPlatforms() []entity.Platform {
 	return s.repo.GetAllPlatforms()
 }
 
-func (s *gameListService) CreateProfile(profile entity.ProfileInfo) error {
+func (s *gameListService) CreateProfile(profile entity.Profile) error {
+	// Encrypting password
+	hash, err := bcrypt.GenerateFromPassword([]byte(profile.Password), 10)
+	if err != nil {
+		return err
+	}
+
+	profile.Password = string(hash)
+
 	return s.repo.CreateProfile(profile)
 }
 
-func (s *gameListService) SaveProfile(profile entity.ProfileInfo) error {
+func (s *gameListService) SaveProfile(profile entity.Profile) error {
+	// Generate hash for new password if it was changed
+	if len(profile.Password) > 0 {
+		hash, err := bcrypt.GenerateFromPassword([]byte(profile.Password), 10)
+		if err != nil {
+			return err
+		}
+
+		profile.Password = string(hash)
+	}
+
 	return s.repo.SaveProfile(profile)
 }
 
 func (s *gameListService) GetAllProfiles() []entity.ProfileInfo {
 	return s.repo.GetAllProfiles()
+}
+
+func (s *gameListService) CheckLogin(login entity.LoginProfile) bool {
+	profile, err := s.repo.GetProfile(login.Nickname)
+	if err != nil {
+		return false
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(profile.Password), []byte(login.Password))
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 func (s *gameListService) SaveSocialType(socialType entity.SocialType) error {

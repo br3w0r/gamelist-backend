@@ -22,6 +22,7 @@ type GameListController interface {
 
 	PostProfile(ctx *gin.Context)
 	GetAllProfiles(ctx *gin.Context)
+	CheckLogin(ctx *gin.Context)
 
 	PostSocialType(ctx *gin.Context)
 	GetAllSocialtypes(ctx *gin.Context)
@@ -60,11 +61,21 @@ func (c *gameListController) GetAllPlatforms(ctx *gin.Context) {
 }
 
 func (c *gameListController) PostProfile(ctx *gin.Context) {
-	GenericPost(ctx, &entity.ProfileInfo{}, c.service.CreateProfile)
+	GenericPost(ctx, &entity.Profile{}, c.service.CreateProfile)
 }
 
 func (c *gameListController) GetAllProfiles(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, c.service.GetAllProfiles())
+}
+
+func (c *gameListController) CheckLogin(ctx *gin.Context) {
+	var login entity.LoginProfile
+	err := ctx.ShouldBindJSON(&login)
+	if err != nil {
+		ErrorSender(ctx, err)
+	} else {
+		ctx.JSON(http.StatusOK, c.service.CheckLogin(login))
+	}
 }
 
 func (c *gameListController) PostSocialType(ctx *gin.Context) {

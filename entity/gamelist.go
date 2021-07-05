@@ -39,6 +39,16 @@ type ProfileInfo struct {
 	Socials     []Social `gorm:"foreignKey:ProfileID"`
 }
 
+type Profile struct {
+	ProfileInfo
+	Password string `json:"password" binding:"gte=6"`
+}
+
+type LoginProfile struct {
+	Nickname string `json:"nickname" binding:"gte=2,lte=20"`
+	Password string `json:"password" binding:"gte=6"`
+}
+
 type Social struct {
 	ProfileID uint64     `gorm:"primaryKey" json:"-"`
 	Type      SocialType `gorm:"foreignKey:TypeID" json:"-"`

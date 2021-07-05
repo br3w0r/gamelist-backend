@@ -28,19 +28,7 @@ func NewGameListController(service service.GameListService) GameListController {
 }
 
 func (c *gameListController) PostGame(ctx *gin.Context) {
-	var game entity.GameProperties
-	err := ctx.ShouldBindJSON(&game)
-
-	if err != nil {
-		ErrorSender(ctx, err)
-	} else {
-		err = c.service.SaveGame(game)
-		if err != nil {
-			ErrorSender(ctx, err)
-		} else {
-			ResponseOK(ctx)
-		}
-	}
+	GenericPost(ctx, &entity.GameProperties{}, c.service.SaveGame)
 }
 
 func (c *gameListController) GetAllGames(ctx *gin.Context) {
@@ -48,19 +36,7 @@ func (c *gameListController) GetAllGames(ctx *gin.Context) {
 }
 
 func (c *gameListController) PostGenre(ctx *gin.Context) {
-	var genre entity.Genre
-	err := ctx.ShouldBindJSON(&genre)
-
-	if err != nil {
-		ErrorSender(ctx, err)
-	} else {
-		err = c.service.SaveGenre(genre)
-		if err != nil {
-			ErrorSender(ctx, err)
-		} else {
-			ResponseOK(ctx)
-		}
-	}
+	GenericPost(ctx, &entity.Genre{}, c.service.SaveGenre)
 }
 
 func (c *gameListController) GetAllGenres(ctx *gin.Context) {
@@ -68,19 +44,7 @@ func (c *gameListController) GetAllGenres(ctx *gin.Context) {
 }
 
 func (c *gameListController) PostPlatform(ctx *gin.Context) {
-	var platform entity.Platform
-	err := ctx.ShouldBindJSON(&platform)
-
-	if err != nil {
-		ErrorSender(ctx, err)
-	} else {
-		err = c.service.SavePlatform(platform)
-		if err != nil {
-			ErrorSender(ctx, err)
-		} else {
-			ResponseOK(ctx)
-		}
-	}
+	GenericPost(ctx, &entity.Platform{}, c.service.SavePlatform)
 }
 
 func (c *gameListController) GetAllPlatforms(ctx *gin.Context) {

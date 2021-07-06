@@ -98,15 +98,15 @@ func (s *gameListService) GetAllProfiles() []entity.ProfileInfo {
 }
 
 func (s *gameListService) CheckLogin(login entity.LoginProfile) bool {
-	profile, err := s.repo.GetProfile(login.Nickname)
+	profile, err := s.repo.GetProfile(entity.ProfileCreds{
+		Nickname: login.Nickname,
+		Email:    login.Email,
+	})
 	if err != nil {
 		return false
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(profile.Password), []byte(login.Password))
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 func (s *gameListService) SaveSocialType(socialType entity.SocialType) error {

@@ -23,7 +23,7 @@ type GamelistRepository interface {
 	CreateProfile(profile entity.Profile) error
 	SaveProfile(profile entity.Profile) error
 	GetAllProfiles() []entity.ProfileInfo
-	GetProfile(nickname string) (*entity.Profile, error)
+	GetProfile(login entity.ProfileCreds) (*entity.Profile, error)
 
 	SaveSocialType(socialType entity.SocialType) error
 	GetAllSocialTypes() []entity.SocialType
@@ -125,9 +125,9 @@ func (r *gameListRepository) GetAllProfiles() []entity.ProfileInfo {
 	return profiles
 }
 
-func (r *gameListRepository) GetProfile(nickname string) (*entity.Profile, error) {
+func (r *gameListRepository) GetProfile(login entity.ProfileCreds) (*entity.Profile, error) {
 	var profile entity.Profile
-	err := r.db.First(&profile, map[string]string{"nickname": nickname}).Error
+	err := r.db.First(&profile, login).Error
 	if err != nil {
 		return nil, err
 	}

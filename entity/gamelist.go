@@ -41,11 +41,13 @@ type ProfileInfo struct {
 
 type Profile struct {
 	ProfileInfo
+	Email    string `gorm:"unique;not null" json:"email" binding:"required"`
 	Password string `json:"password" binding:"gte=6"`
 }
 
 type LoginProfile struct {
-	Nickname string `json:"nickname" binding:"gte=2,lte=20"`
+	Nickname string `json:"nickname"`
+	Email    string `json:"email"`
 	Password string `json:"password" binding:"gte=6"`
 }
 

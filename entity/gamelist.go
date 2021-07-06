@@ -48,7 +48,7 @@ type Profile struct {
 type LoginProfile struct {
 	Nickname string `json:"nickname"`
 	Email    string `json:"email"`
-	Password string `json:"password" binding:"gte=6"`
+	Password string `gorm:"varchar(70);not null" json:"password" binding:"gte=6"`
 }
 
 type Social struct {

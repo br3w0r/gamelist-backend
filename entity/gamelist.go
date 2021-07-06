@@ -42,13 +42,13 @@ type ProfileInfo struct {
 type Profile struct {
 	ProfileInfo
 	Email    string `gorm:"unique;not null" json:"email" binding:"required"`
-	Password string `json:"password" binding:"gte=6"`
+	Password string `json:"password" binding:"gte=6,lte=70"`
 }
 
 type LoginProfile struct {
 	Nickname string `json:"nickname"`
 	Email    string `json:"email"`
-	Password string `gorm:"varchar(70);not null" json:"password" binding:"gte=6"`
+	Password string `gorm:"varchar(70);not null" json:"password" binding:"gte=6,lte=70"`
 }
 
 type Social struct {

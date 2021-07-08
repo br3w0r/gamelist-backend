@@ -14,7 +14,7 @@ var (
 )
 
 func ErrorSender(ctx *gin.Context, err error) {
-	ctx.JSON(http.StatusBadRequest, gin.H{
+	ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 		"error": err.Error(),
 	})
 }

@@ -33,8 +33,15 @@ type Platform struct {
 
 type Profile struct {
 	ProfileInfo
-	Email    string `gorm:"unique;not null" json:"email" binding:"required"`
-	Password string `json:"password" binding:"gte=6,lte=70"`
+	Email         string         `gorm:"unique;not null" json:"email" binding:"required"`
+	Password      string         `json:"password" binding:"gte=6,lte=70"`
+	RefreshTokens []RefreshToken `gorm:"foreignKey:ProfileID" json:"-"`
+}
+
+type RefreshToken struct {
+	Model
+	ProfileID uint64 `json:"-"`
+	Token     string `json:"-"`
 }
 
 type Social struct {

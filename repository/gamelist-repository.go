@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"os"
 
 	"bitbucket.org/br3w0r/gamelist-backend/entity"
@@ -24,6 +25,11 @@ type GamelistRepository interface {
 	GetAllProfiles() []entity.ProfileInfo
 	GetProfile(login entity.ProfileCreds) (*entity.Profile, error)
 
+	SaveRefreshToken(nickname string, tokenString string) error
+	FindRefreshToken(nickname string, tokenString string) error
+	DeleteRefreshToken(tokenString string) error
+	DeleteAllUserRefreshTokens(nickname string) error
+
 	SaveSocialType(socialType entity.SocialType) error
 	GetAllSocialTypes() []entity.SocialType
 }
@@ -42,7 +48,7 @@ func NewGamelistRepository(dbName string, forceMigrate bool) GamelistRepository 
 			panic("Failed to connect database.")
 		}
 		db.AutoMigrate(&entity.GameProperties{}, &entity.Genre{},
-			&entity.Platform{}, &entity.Profile{}, &entity.Social{},
+			&entity.Platform{}, &entity.Profile{}, &entity.RefreshToken{}, &entity.Social{},
 			&entity.SocialType{}, &entity.ProfileGames{}, &entity.ListType{})
 	} else {
 		db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
@@ -131,6 +137,53 @@ func (r *gameListRepository) GetProfile(login entity.ProfileCreds) (*entity.Prof
 	return &profile, nil
 }
 
+func (r *gameListRepository) SaveRefreshToken(nickname string, tokenString string) error {
+	user, err := r.findUserWithNickname(nickname)
+	if err != nil {
+		return err
+	}
+
+	refreshToken := entity.RefreshToken{
+		ProfileID: user.ID,
+		Token:     tokenString,
+	}
+
+	err = r.db.Create(&refreshToken).Error
+	if err != nil {
+		return fmt.Errorf("unable to save the refresh token: %v", err)
+	}
+	return nil
+}
+
+func (r *gameListRepository) FindRefreshToken(nickname string, tokenString string) error {
+	user, err := r.findUserWithNickname(nickname)
+	if err != nil {
+		return err
+	}
+
+	refreshToken := entity.RefreshToken{
+		ProfileID: user.ID,
+		Token:     tokenString,
+	}
+
+	val := r.db.First(&refreshToken, refreshToken)
+	fmt.Println(refreshToken)
+	return val.Error
+}
+
+func (r *gameListRepository) DeleteRefreshToken(tokenString string) error {
+	return r.db.Where("token = ?", tokenString).Delete(&entity.RefreshToken{}).Error
+}
+
+func (r *gameListRepository) DeleteAllUserRefreshTokens(nickname string) error {
+	user, err := r.findUserWithNickname(nickname)
+	if err != nil {
+		return err
+	}
+
+	return r.db.Where("profile_id = ?", user.ID).Delete(&entity.RefreshToken{}).Error
+}
+
 func (r *gameListRepository) SaveSocialType(socialType entity.SocialType) error {
 	return r.db.Save(&socialType).Error
 }
@@ -139,4 +192,13 @@ func (r *gameListRepository) GetAllSocialTypes() []entity.SocialType {
 	var socialTypes []entity.SocialType
 	r.db.Find(&socialTypes)
 	return socialTypes
+}
+
+func (r *gameListRepository) findUserWithNickname(nickname string) (*entity.Profile, error) {
+	var user entity.Profile
+	err := r.db.First(&user, map[string]string{"nickname": nickname}).Error
+	if err != nil {
+		return nil, fmt.Errorf("unable to find user with given nickname: %v", err)
+	}
+	return &user, nil
 }

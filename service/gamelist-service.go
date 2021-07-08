@@ -26,7 +26,7 @@ type GameListService interface {
 	CreateProfile(profile entity.Profile) error
 	SaveProfile(profile entity.Profile) error
 	GetAllProfiles() []entity.ProfileInfo
-	CheckLogin(login entity.LoginProfile) bool
+	CheckLogin(login entity.LoginProfile) (*entity.Profile, error)
 
 	SaveSocialType(socialType entity.SocialType) error
 	GetAllSocialTypes() []entity.SocialType
@@ -97,16 +97,19 @@ func (s *gameListService) GetAllProfiles() []entity.ProfileInfo {
 	return s.repo.GetAllProfiles()
 }
 
-func (s *gameListService) CheckLogin(login entity.LoginProfile) bool {
+func (s *gameListService) CheckLogin(login entity.LoginProfile) (*entity.Profile, error) {
 	profile, err := s.repo.GetProfile(entity.ProfileCreds{
 		Nickname: login.Nickname,
 		Email:    login.Email,
 	})
 	if err != nil {
-		return false
+		return nil, err
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(profile.Password), []byte(login.Password))
-	return err == nil
+	if err != nil {
+		return nil, err
+	}
+	return profile, err
 }
 
 func (s *gameListService) SaveSocialType(socialType entity.SocialType) error {

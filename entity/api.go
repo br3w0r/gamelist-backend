@@ -18,3 +18,12 @@ type LoginProfile struct {
 	Email    string `json:"email"`
 	Password string `gorm:"varchar(70);not null" json:"password" binding:"gte=6,lte=70"`
 }
+
+type TokenPair struct {
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+type RefreshRequest struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}

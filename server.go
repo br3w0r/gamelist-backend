@@ -23,9 +23,15 @@ func main() {
 	}
 
 	var (
-		gamelistRepository                               = repository.NewGamelistRepository("gamelist.db", *migrate)
-		gamelistService    service.GameListService       = service.NewGameListService(gamelistRepository)
-		gamelistController controller.GameListController = controller.NewGameListController(gamelistService)
+		// Repos
+		gamelistRepository = repository.NewGamelistRepository("gamelist.db", *migrate)
+
+		// Services
+		gamelistService service.GameListService = service.NewGameListService(gamelistRepository)
+		jwtService      service.JWTService      = service.NewJWTService(gamelistRepository)
+
+		// Controllers
+		gamelistController controller.GameListController = controller.NewGameListController(gamelistService, jwtService)
 	)
 
 	if *forceScrape {
@@ -48,6 +54,15 @@ func main() {
 	{
 		apiRoutes.GET("/games/all", gamelistController.GetAllGames)
 
+		apiRoutes.POST("/profiles", gamelistController.PostProfile)
+
+		apiRoutes.POST("/aquire-tokens", gamelistController.AcquireJWTPair)
+		apiRoutes.POST("/refresh-tokens", gamelistController.RefreshJWTPair)
+		apiRoutes.GET("/delete-all-refresh-tokens",
+			gamelistController.Authorized,
+			gamelistController.DeleteAllRefreshTokens,
+		)
+
 		// This will be replaced with gRPC call
 		apiRoutes.POST("/games", gamelistController.PostGame)
 
@@ -58,9 +73,6 @@ func main() {
 		apiRoutes.POST("/platforms", gamelistController.PostPlatform)
 
 		apiRoutes.GET("/profiles", gamelistController.GetAllProfiles)
-		apiRoutes.POST("/profiles", gamelistController.PostProfile)
-
-		apiRoutes.POST("/login-check", gamelistController.CheckLogin)
 
 		apiRoutes.GET("/social-types", gamelistController.GetAllSocialtypes)
 		apiRoutes.POST("/social-types", gamelistController.PostSocialType)

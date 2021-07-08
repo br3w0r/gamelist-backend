@@ -138,13 +138,13 @@ func (r *gameListRepository) GetProfile(login entity.ProfileCreds) (*entity.Prof
 }
 
 func (r *gameListRepository) SaveRefreshToken(nickname string, tokenString string) error {
-	user, err := r.findUserWithNickname(nickname)
+	userID, err := r.findUserIDByNickname(nickname)
 	if err != nil {
 		return err
 	}
 
 	refreshToken := entity.RefreshToken{
-		ProfileID: user.ID,
+		ProfileID: userID,
 		Token:     tokenString,
 	}
 
@@ -156,19 +156,23 @@ func (r *gameListRepository) SaveRefreshToken(nickname string, tokenString strin
 }
 
 func (r *gameListRepository) FindRefreshToken(nickname string, tokenString string) error {
-	user, err := r.findUserWithNickname(nickname)
+	var result []entity.RefreshToken
+	err := r.db.Table("refresh_tokens, profiles").Select("refresh_tokens.token").Where(
+		"refresh_tokens.token = ?", tokenString).Where(
+		"refresh_tokens.profile_id = profiles.id").Where(
+		"profiles.nickname = ?", nickname).Where(
+		"refresh_tokens.deleted_at IS NULL").Scan(&result).Error
+
 	if err != nil {
 		return err
 	}
 
-	refreshToken := entity.RefreshToken{
-		ProfileID: user.ID,
-		Token:     tokenString,
-	}
+	fmt.Println(len(result), result)
 
-	val := r.db.First(&refreshToken, refreshToken)
-	fmt.Println(refreshToken)
-	return val.Error
+	if len(result) == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }
 
 func (r *gameListRepository) DeleteRefreshToken(tokenString string) error {
@@ -176,12 +180,12 @@ func (r *gameListRepository) DeleteRefreshToken(tokenString string) error {
 }
 
 func (r *gameListRepository) DeleteAllUserRefreshTokens(nickname string) error {
-	user, err := r.findUserWithNickname(nickname)
+	userID, err := r.findUserIDByNickname(nickname)
 	if err != nil {
 		return err
 	}
 
-	return r.db.Where("profile_id = ?", user.ID).Delete(&entity.RefreshToken{}).Error
+	return r.db.Where("profile_id = ?", userID).Delete(&entity.RefreshToken{}).Error
 }
 
 func (r *gameListRepository) SaveSocialType(socialType entity.SocialType) error {
@@ -194,11 +198,11 @@ func (r *gameListRepository) GetAllSocialTypes() []entity.SocialType {
 	return socialTypes
 }
 
-func (r *gameListRepository) findUserWithNickname(nickname string) (*entity.Profile, error) {
-	var user entity.Profile
-	err := r.db.First(&user, map[string]string{"nickname": nickname}).Error
+func (r *gameListRepository) findUserIDByNickname(nickname string) (uint64, error) {
+	var userID uint64
+	err := r.db.Table("profiles").Select("id").Take(&userID, map[string]string{"nickname": nickname}).Error
 	if err != nil {
-		return nil, fmt.Errorf("unable to find user with given nickname: %v", err)
+		return 0, fmt.Errorf("unable to find user with given nickname: %v", err)
 	}
-	return &user, nil
+	return userID, nil
 }

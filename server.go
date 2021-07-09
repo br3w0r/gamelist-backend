@@ -52,7 +52,10 @@ func main() {
 
 	apiRoutes := server.Group("/api/v0")
 	{
-		apiRoutes.GET("/games/all", gamelistController.GetAllGames)
+		apiRoutes.GET("/games/all",
+			gamelistController.Authorized,
+			gamelistController.GetAllGames,
+		)
 
 		apiRoutes.POST("/profiles", gamelistController.PostProfile)
 

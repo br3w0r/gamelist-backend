@@ -151,6 +151,10 @@ func (s *jwtService) validateToken(tokenString string, isRefresh bool) (string, 
 		return key, nil
 	})
 
+	if err != nil {
+		return "", err
+	}
+
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return claims["sub"].(string), nil
 	}

@@ -9,10 +9,10 @@ import (
 type GameProperties struct {
 	Model
 	Name         string     `gorm:"unique;" json:"name" binding:"required"`
-	Platforms    []Platform `gorm:"many2many:game_platforms" json:"platforms" binding:"required"`
+	Platforms    []Platform `gorm:"many2many:game_platforms" json:"-"`
 	ImageURL     string     `json:"image_url" binding:"required,url"`
 	YearReleased uint16     `json:"year_released" binding:"required,gte=1000"`
-	Genres       []Genre    `gorm:"many2many:game_genres" json:"genres" binding:"required"`
+	Genres       []Genre    `gorm:"many2many:game_genres" json:"-"`
 }
 
 type Genre struct {
@@ -56,7 +56,7 @@ type SocialType struct {
 	Name string `gorm:"varchar(20);unique" json:"name"`
 }
 
-type ProfileGames struct {
+type ProfileGame struct {
 	Profile    ProfileInfo    `gorm:"foreignKey:ProfileID" json:"-"`
 	ProfileID  uint64         `gorm:"primaryKey" json:"-"`
 	Game       GameProperties `gorm:"foreignKey:GameID" json:"game"`

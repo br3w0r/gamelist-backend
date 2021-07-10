@@ -54,7 +54,17 @@ func main() {
 	{
 		apiRoutes.GET("/games/all",
 			gamelistController.Authorized,
-			gamelistController.GetAllGames,
+			gamelistController.GetAllGamesTyped,
+		)
+
+		apiRoutes.POST("/list-game",
+			gamelistController.Authorized,
+			gamelistController.ListGame,
+		)
+
+		apiRoutes.GET("/my-games",
+			gamelistController.Authorized,
+			gamelistController.GetMyGameList,
 		)
 
 		apiRoutes.POST("/profiles", gamelistController.PostProfile)
@@ -68,6 +78,9 @@ func main() {
 
 		// This will be replaced with gRPC call
 		apiRoutes.POST("/games", gamelistController.PostGame)
+
+		apiRoutes.POST("/list-types", gamelistController.PostListType)
+		apiRoutes.GET("/list-types", gamelistController.GetAllListTypes)
 
 		apiRoutes.GET("/genres", gamelistController.GetAllGenres)
 		apiRoutes.POST("/genres", gamelistController.PostGenre)

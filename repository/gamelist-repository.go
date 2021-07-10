@@ -13,6 +13,12 @@ import (
 type GamelistRepository interface {
 	SaveGame(game entity.GameProperties) error
 	GetAllGames() []entity.GameProperties
+	GetAllGamesTyped(nickname string) []entity.TypedGameListProperties
+	GetUserGameList(nickname string) []entity.TypedGameListProperties
+
+	CreateListType(listType entity.ListType) error
+	GetAllListTypes() []entity.ListType
+	ListGame(nickname string, gameId uint64, listType uint64) error
 
 	SaveGenre(genre entity.Genre) error
 	GetAllGenres() []entity.Genre
@@ -49,7 +55,7 @@ func NewGamelistRepository(dbName string, forceMigrate bool) GamelistRepository 
 		}
 		db.AutoMigrate(&entity.GameProperties{}, &entity.Genre{},
 			&entity.Platform{}, &entity.Profile{}, &entity.RefreshToken{}, &entity.Social{},
-			&entity.SocialType{}, &entity.ProfileGames{}, &entity.ListType{})
+			&entity.SocialType{}, &entity.ProfileGame{}, &entity.ListType{})
 	} else {
 		db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
 		if err != nil {
@@ -82,6 +88,73 @@ func (r *gameListRepository) GetAllGames() []entity.GameProperties {
 	var games []entity.GameProperties
 	r.db.Preload(clause.Associations).Find(&games)
 	return games
+}
+
+func (r *gameListRepository) GetAllGamesTyped(nickname string) []entity.TypedGameListProperties {
+	userId, err := r.findUserIDByNickname(nickname)
+	if err != nil {
+		return nil
+	}
+	var games []entity.TypedGameListProperties
+	r.db.Table("game_properties").
+		Joins("left join profile_games on game_properties.id = profile_games.game_id and profile_games.profile_id = ?", userId).
+		Scan(&games)
+
+	return games
+}
+
+func (r *gameListRepository) GetUserGameList(nickname string) []entity.TypedGameListProperties {
+	var games []entity.TypedGameListProperties
+	r.db.Table("game_properties").Select(
+		"game_properties.id, game_properties.name, game_properties.image_url, game_properties.year_released, profile_games.list_type_id",
+	).Joins(
+		"join profiles, profile_games on game_properties.id = profile_games.game_id and profile_games.profile_id = profiles.id and profile_games.list_type_id != 0 and profiles.nickname = ?",
+		nickname,
+	).Scan(&games)
+	return games
+}
+
+func (r *gameListRepository) CreateListType(listType entity.ListType) error {
+	return r.db.Create(&listType).Error
+}
+
+func (r *gameListRepository) GetAllListTypes() []entity.ListType {
+	var types []entity.ListType
+	r.db.Find(&types)
+	return types
+}
+
+func (r *gameListRepository) ListGame(nickname string, gameId uint64, listType uint64) error {
+	userId, err := r.findUserIDByNickname(nickname)
+	if err != nil {
+		return err
+	}
+
+	err = r.db.First(&entity.GameProperties{}, gameId).Error
+	if err == gorm.ErrRecordNotFound {
+		return fmt.Errorf("couldn't find game with id: %d", gameId)
+	}
+	if err != nil {
+		return err
+	}
+
+	if listType != 0 {
+		err = r.db.First(&entity.ListType{}, listType).Error
+		if err == gorm.ErrRecordNotFound {
+			return fmt.Errorf("couldn't find list type with id: %d", listType)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	listGame := entity.ProfileGame{
+		ProfileID:  userId,
+		GameID:     gameId,
+		ListTypeID: listType,
+	}
+
+	return r.db.Save(&listGame).Error
 }
 
 func (r *gameListRepository) SaveGenre(genre entity.Genre) error {

@@ -16,6 +16,12 @@ import (
 type GameListService interface {
 	SaveGame(game entity.GameProperties) error
 	GetAllGames() []entity.GameProperties
+	GetAllGamesTyped(nickname string) []entity.TypedGameListProperties
+	GetUserGameList(nickname string) []entity.TypedGameListProperties
+
+	CreateListType(listType entity.ListType) error
+	GetAllListTypes() []entity.ListType
+	ListGame(nickname string, gameId uint64, listType uint64) error
 
 	SaveGenre(genre entity.Genre) error
 	GetAllGenres() []entity.Genre
@@ -49,6 +55,26 @@ func (s *gameListService) SaveGame(game entity.GameProperties) error {
 
 func (s *gameListService) GetAllGames() []entity.GameProperties {
 	return s.repo.GetAllGames()
+}
+
+func (s *gameListService) GetAllGamesTyped(nickname string) []entity.TypedGameListProperties {
+	return s.repo.GetAllGamesTyped(nickname)
+}
+
+func (s *gameListService) GetUserGameList(nickname string) []entity.TypedGameListProperties {
+	return s.repo.GetUserGameList(nickname)
+}
+
+func (s *gameListService) CreateListType(listType entity.ListType) error {
+	return s.repo.CreateListType(listType)
+}
+
+func (s *gameListService) GetAllListTypes() []entity.ListType {
+	return s.repo.GetAllListTypes()
+}
+
+func (s *gameListService) ListGame(nickname string, gameId uint64, listType uint64) error {
+	return s.repo.ListGame(nickname, gameId, listType)
 }
 
 func (s *gameListService) SaveGenre(genre entity.Genre) error {

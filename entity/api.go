@@ -27,3 +27,13 @@ type TokenPair struct {
 type RefreshRequest struct {
 	RefreshToken string `json:"refresh_token" binding:"required"`
 }
+
+type GameListRequest struct {
+	GameId   uint64 `json:"game_id" binding:"required"`
+	ListType uint64 `json:"list_type"`
+}
+
+type TypedGameListProperties struct {
+	GameProperties
+	ListTypeID uint64 `json:"user_list"`
+}

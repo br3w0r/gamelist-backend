@@ -12,9 +12,15 @@ import (
 
 type GameListController interface {
 	GetAllGames(ctx *gin.Context)
+	GetAllGamesTyped(ctx *gin.Context)
+	GetMyGameList(ctx *gin.Context)
 
 	// Will be replaced with gRPC calls
 	PostGame(ctx *gin.Context)
+
+	PostListType(ctx *gin.Context)
+	GetAllListTypes(ctx *gin.Context)
+	ListGame(ctx *gin.Context)
 
 	PostGenre(ctx *gin.Context)
 	GetAllGenres(ctx *gin.Context)
@@ -52,6 +58,41 @@ func (c *gameListController) PostGame(ctx *gin.Context) {
 
 func (c *gameListController) GetAllGames(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, c.gamelistService.GetAllGames())
+}
+
+func (c *gameListController) GetAllGamesTyped(ctx *gin.Context) {
+	nickname := ctx.MustGet("nickname").(string)
+	ctx.JSON(http.StatusOK, c.gamelistService.GetAllGamesTyped(nickname))
+}
+
+func (c *gameListController) GetMyGameList(ctx *gin.Context) {
+	nickname := ctx.MustGet("nickname").(string)
+	ctx.JSON(http.StatusOK, c.gamelistService.GetUserGameList(nickname))
+}
+
+func (c *gameListController) PostListType(ctx *gin.Context) {
+	GenericPost(ctx, &entity.ListType{}, c.gamelistService.CreateListType)
+}
+
+func (c *gameListController) GetAllListTypes(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, c.gamelistService.GetAllListTypes())
+}
+
+func (c *gameListController) ListGame(ctx *gin.Context) {
+	nickname := ctx.MustGet("nickname").(string)
+
+	var gameList entity.GameListRequest
+	err := ctx.ShouldBindJSON(&gameList)
+	if err != nil {
+		ErrorSender(ctx, err)
+	} else {
+		err := c.gamelistService.ListGame(nickname, gameList.GameId, gameList.ListType)
+		if err != nil {
+			ErrorSender(ctx, err)
+		} else {
+			ResponseOK(ctx)
+		}
+	}
 }
 
 func (c *gameListController) PostGenre(ctx *gin.Context) {

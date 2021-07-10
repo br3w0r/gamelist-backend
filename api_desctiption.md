@@ -10,7 +10,8 @@ Chunk structure:
 
 ```json
 [
-    <game_properties>
+    <game_properties>,
+    "user_list": int
 ]
 ```
 

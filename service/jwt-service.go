@@ -15,6 +15,7 @@ type JWTService interface {
 	GenerateTokens(user string) (*entity.TokenPair, error)
 	Authenticate(tokenString string) (string, error)
 	RefreshTokens(refreshToken string) (*entity.TokenPair, error)
+	RevokeRefreshToken(refreshToken string) error
 	DeleteAllUserRefreshTokens(nickname string) error
 }
 
@@ -123,6 +124,10 @@ func (s *jwtService) RefreshTokens(refreshToken string) (*entity.TokenPair, erro
 	s.repo.DeleteRefreshToken(refreshToken)
 
 	return tokens, nil
+}
+
+func (s *jwtService) RevokeRefreshToken(refreshToken string) error {
+	return s.repo.DeleteRefreshToken(refreshToken)
 }
 
 func (s *jwtService) DeleteAllUserRefreshTokens(nickname string) error {

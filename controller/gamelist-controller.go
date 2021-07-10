@@ -15,6 +15,12 @@ type GameListController interface {
 	GetAllGamesTyped(ctx *gin.Context)
 	GetMyGameList(ctx *gin.Context)
 
+	AcquireJWTPair(ctx *gin.Context)
+	RefreshJWTPair(ctx *gin.Context)
+	RevokeRefreshToken(ctx *gin.Context)
+	DeleteAllRefreshTokens(ctx *gin.Context)
+	Authorized(ctx *gin.Context)
+
 	// Will be replaced with gRPC calls
 	PostGame(ctx *gin.Context)
 
@@ -30,11 +36,6 @@ type GameListController interface {
 
 	PostProfile(ctx *gin.Context)
 	GetAllProfiles(ctx *gin.Context)
-
-	AcquireJWTPair(ctx *gin.Context)
-	RefreshJWTPair(ctx *gin.Context)
-	DeleteAllRefreshTokens(ctx *gin.Context)
-	Authorized(ctx *gin.Context)
 
 	PostSocialType(ctx *gin.Context)
 	GetAllSocialtypes(ctx *gin.Context)
@@ -155,6 +156,17 @@ func (c *gameListController) RefreshJWTPair(ctx *gin.Context) {
 		} else {
 			ctx.JSON(http.StatusOK, pair)
 		}
+	}
+}
+
+func (c *gameListController) RevokeRefreshToken(ctx *gin.Context) {
+	var request entity.RefreshRequest
+	err := ctx.ShouldBindJSON(&request)
+	if err != nil {
+		ErrorSender(ctx, err)
+	} else {
+		c.jwtService.RevokeRefreshToken(request.RefreshToken)
+		ResponseOK(ctx)
 	}
 }
 

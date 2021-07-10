@@ -71,6 +71,7 @@ func main() {
 
 		apiRoutes.POST("/aquire-tokens", gamelistController.AcquireJWTPair)
 		apiRoutes.POST("/refresh-tokens", gamelistController.RefreshJWTPair)
+		apiRoutes.POST("/revoke-token", gamelistController.RevokeRefreshToken)
 		apiRoutes.GET("/delete-all-refresh-tokens",
 			gamelistController.Authorized,
 			gamelistController.DeleteAllRefreshTokens,

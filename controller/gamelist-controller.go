@@ -15,6 +15,7 @@ type GameListController interface {
 	GetAllGamesTyped(ctx *gin.Context)
 	GetMyGameList(ctx *gin.Context)
 	SearchGames(ctx *gin.Context)
+	GameDetails(ctx *gin.Context)
 
 	AcquireJWTPair(ctx *gin.Context)
 	RefreshJWTPair(ctx *gin.Context)
@@ -79,6 +80,22 @@ func (c *gameListController) SearchGames(ctx *gin.Context) {
 		ErrorSender(ctx, err)
 	} else {
 		ctx.JSON(http.StatusOK, c.gamelistService.SearchGames(request.Name))
+	}
+}
+
+func (c *gameListController) GameDetails(ctx *gin.Context) {
+	nickname := ctx.MustGet("nickname").(string)
+	var request entity.GameDetailsRequest
+	err := ctx.ShouldBindJSON(&request)
+	if err != nil {
+		ErrorSender(ctx, err)
+	} else {
+		gameDetails, err := c.gamelistService.GetGameDetails(nickname, request.Id)
+		if err != nil {
+			ErrorSender(ctx, err)
+		} else {
+			ctx.JSON(http.StatusOK, gameDetails)
+		}
 	}
 }
 

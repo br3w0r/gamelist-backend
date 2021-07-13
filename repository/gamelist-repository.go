@@ -16,6 +16,7 @@ type GamelistRepository interface {
 	GetAllGamesTyped(nickname string) []entity.TypedGameListProperties
 	GetUserGameList(nickname string) []entity.TypedGameListProperties
 	SearchGames(name string) []entity.GameProperties
+	GetGameDetails(nickname string, id uint64) (*entity.GameDetailsResponse, error)
 
 	CreateListType(listType entity.ListType) error
 	GetAllListTypes() []entity.ListType
@@ -119,6 +120,45 @@ func (r *gameListRepository) SearchGames(name string) []entity.GameProperties {
 	var games []entity.GameProperties
 	r.db.Where("name LIKE ?", "%"+name+"%").Limit(10).Find(&games)
 	return games
+}
+
+func (r *gameListRepository) GetGameDetails(nickname string, gameId uint64) (*entity.GameDetailsResponse, error) {
+	userId, err := r.findUserIDByNickname(nickname)
+	if err == gorm.ErrRecordNotFound {
+		return nil, fmt.Errorf("unable to find a user with nickname: %s", nickname)
+	}
+	if err != nil {
+		return nil, err
+	}
+	var gameDetails entity.GameDetailsResponse
+	err = r.db.Table("game_properties").
+		Joins("left join profile_games on game_properties.id = profile_games.game_id and profile_games.profile_id = ?", userId).
+		Where("game_properties.id = ?", gameId).
+		Scan(&(gameDetails.Game)).Error
+
+	if gameDetails.Game.ID == 0 {
+		return nil, fmt.Errorf("unable to find a game with id: %d", gameId)
+	}
+	if err != nil {
+		return nil, err
+	}
+	err = r.db.Table("platforms").Select("platforms.name").
+		Joins("inner join game_platforms on game_platforms.game_properties_id = ? and game_platforms.platform_id = platforms.id", gameId).
+		Scan(&(gameDetails.Platforms)).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.db.Table("genres").Select("genres.name").
+		Joins("inner join game_genres on game_genres.game_properties_id = ? and game_genres.genre_id = genres.id", gameId).
+		Scan(&(gameDetails.Genres)).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &gameDetails, nil
 }
 
 func (r *gameListRepository) CreateListType(listType entity.ListType) error {

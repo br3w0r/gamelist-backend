@@ -72,6 +72,11 @@ func main() {
 			gamelistController.SearchGames,
 		)
 
+		apiRoutes.POST("/games/details",
+			gamelistController.Authorized,
+			gamelistController.GameDetails,
+		)
+
 		apiRoutes.POST("/profiles", gamelistController.PostProfile)
 
 		apiRoutes.POST("/aquire-tokens", gamelistController.AcquireJWTPair)

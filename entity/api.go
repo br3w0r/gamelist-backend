@@ -41,3 +41,13 @@ type TypedGameListProperties struct {
 type SearchRequest struct {
 	Name string `json:"name"`
 }
+
+type GameDetailsRequest struct {
+	Id uint64 `json:"id"`
+}
+
+type GameDetailsResponse struct {
+	Game      TypedGameListProperties `json:"game"`
+	Platforms []Platform              `json:"platforms"`
+	Genres    []Genre                 `json:"genres"`
+}

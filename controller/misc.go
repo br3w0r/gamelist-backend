@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 var (
@@ -72,7 +73,9 @@ func GenericPost(ctx *gin.Context, obj interface{}, f interface{}) {
 		ErrorSender(ctx, err)
 	} else {
 		eVal := fv.Call([]reflect.Value{objVal})[0].Interface()
-		if eVal != nil {
+		if eVal == gorm.ErrRecordNotFound {
+			NotFound(ctx)
+		} else if eVal != nil {
 			ErrorSender(ctx, eVal.(error))
 		} else {
 			ResponseOK(ctx)

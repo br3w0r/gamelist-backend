@@ -38,13 +38,13 @@ A query added to related requests
 }
 ```
 
-## Search (/search)
+## Search (/games/search)
 
 Request:
 
 ```json
 {
-    "query": string // Grand Theft, Red Dead, Final, etc.
+    "name": string // Grand Theft, Red Dead, Final, etc.
 }
 ```
 

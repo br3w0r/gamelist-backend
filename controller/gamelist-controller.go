@@ -14,6 +14,7 @@ type GameListController interface {
 	GetAllGames(ctx *gin.Context)
 	GetAllGamesTyped(ctx *gin.Context)
 	GetMyGameList(ctx *gin.Context)
+	SearchGames(ctx *gin.Context)
 
 	AcquireJWTPair(ctx *gin.Context)
 	RefreshJWTPair(ctx *gin.Context)
@@ -69,6 +70,16 @@ func (c *gameListController) GetAllGamesTyped(ctx *gin.Context) {
 func (c *gameListController) GetMyGameList(ctx *gin.Context) {
 	nickname := ctx.MustGet("nickname").(string)
 	ctx.JSON(http.StatusOK, c.gamelistService.GetUserGameList(nickname))
+}
+
+func (c *gameListController) SearchGames(ctx *gin.Context) {
+	var request entity.SearchRequest
+	err := ctx.ShouldBindJSON(&request)
+	if err != nil {
+		ErrorSender(ctx, err)
+	} else {
+		ctx.JSON(http.StatusOK, c.gamelistService.SearchGames(request.Name))
+	}
 }
 
 func (c *gameListController) PostListType(ctx *gin.Context) {

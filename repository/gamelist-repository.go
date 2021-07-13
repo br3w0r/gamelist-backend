@@ -15,6 +15,7 @@ type GamelistRepository interface {
 	GetAllGames() []entity.GameProperties
 	GetAllGamesTyped(nickname string) []entity.TypedGameListProperties
 	GetUserGameList(nickname string) []entity.TypedGameListProperties
+	SearchGames(name string) []entity.GameProperties
 
 	CreateListType(listType entity.ListType) error
 	GetAllListTypes() []entity.ListType
@@ -111,6 +112,12 @@ func (r *gameListRepository) GetUserGameList(nickname string) []entity.TypedGame
 		"join profiles, profile_games on game_properties.id = profile_games.game_id and profile_games.profile_id = profiles.id and profile_games.list_type_id != 0 and profiles.nickname = ?",
 		nickname,
 	).Scan(&games)
+	return games
+}
+
+func (r *gameListRepository) SearchGames(name string) []entity.GameProperties {
+	var games []entity.GameProperties
+	r.db.Where("name LIKE ?", "%"+name+"%").Limit(10).Find(&games)
 	return games
 }
 

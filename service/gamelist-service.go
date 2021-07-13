@@ -18,6 +18,7 @@ type GameListService interface {
 	GetAllGames() []entity.GameProperties
 	GetAllGamesTyped(nickname string) []entity.TypedGameListProperties
 	GetUserGameList(nickname string) []entity.TypedGameListProperties
+	SearchGames(name string) []entity.GameProperties
 
 	CreateListType(listType entity.ListType) error
 	GetAllListTypes() []entity.ListType
@@ -63,6 +64,10 @@ func (s *gameListService) GetAllGamesTyped(nickname string) []entity.TypedGameLi
 
 func (s *gameListService) GetUserGameList(nickname string) []entity.TypedGameListProperties {
 	return s.repo.GetUserGameList(nickname)
+}
+
+func (s *gameListService) SearchGames(name string) []entity.GameProperties {
+	return s.repo.SearchGames(name)
 }
 
 func (s *gameListService) CreateListType(listType entity.ListType) error {

@@ -37,3 +37,7 @@ type TypedGameListProperties struct {
 	GameProperties
 	ListTypeID uint64 `json:"user_list"`
 }
+
+type SearchRequest struct {
+	Name string `json:"name"`
+}

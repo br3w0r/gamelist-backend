@@ -124,9 +124,6 @@ func (r *gameListRepository) SearchGames(name string) []entity.GameSearchResult 
 
 func (r *gameListRepository) GetGameDetails(nickname string, gameId uint64) (*entity.GameDetailsResponse, error) {
 	userId, err := r.findUserIDByNickname(nickname)
-	if err == gorm.ErrRecordNotFound {
-		return nil, fmt.Errorf("unable to find a user with nickname: %s", nickname)
-	}
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +134,7 @@ func (r *gameListRepository) GetGameDetails(nickname string, gameId uint64) (*en
 		Scan(&(gameDetails.Game)).Error
 
 	if gameDetails.Game.ID == 0 {
-		return nil, fmt.Errorf("unable to find a game with id: %d", gameId)
+		return nil, gorm.ErrRecordNotFound
 	}
 	if err != nil {
 		return nil, err

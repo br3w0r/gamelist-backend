@@ -91,7 +91,9 @@ func (c *gameListController) GameDetails(ctx *gin.Context) {
 		ErrorSender(ctx, err)
 	} else {
 		gameDetails, err := c.gamelistService.GetGameDetails(nickname, request.Id)
-		if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			NotFound(ctx)
+		} else if err != nil {
 			ErrorSender(ctx, err)
 		} else {
 			ctx.JSON(http.StatusOK, gameDetails)

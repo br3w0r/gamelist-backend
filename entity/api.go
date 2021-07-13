@@ -42,6 +42,11 @@ type SearchRequest struct {
 	Name string `json:"name"`
 }
 
+type GameSearchResult struct {
+	Id   uint64 `json:"id"`
+	Name string `json:"name"`
+}
+
 type GameDetailsRequest struct {
 	Id uint64 `json:"id"`
 }

@@ -12,6 +12,8 @@ import (
 )
 
 var (
+	PRODUCTION_MODE      string = helpers.GetEnvOrDefault("PRODUCTION_MODE", "0")
+	SERVE_STATIC         string = helpers.GetEnvOrDefault("SERVE_STATIC", "1")
 	FORCE_MIGRATE        string = helpers.GetEnvOrDefault("FORCE_MIGRATE", "0")
 	FORCE_SCRAPE         string = helpers.GetEnvOrDefault("FORCE_SCRAPE", "0")
 	STATIC_DIR           string = helpers.GetEnvOrDefault("STATIC_FOLDER", "../gamelist-frontend/gamelist/dist")
@@ -43,9 +45,11 @@ func main() {
 
 	server := gin.Default()
 
-	server.Static("/css", STATIC_DIR+"/css")
-	server.Static("/js", STATIC_DIR+"/js")
-	server.LoadHTMLGlob(STATIC_DIR + "/*.html")
+	if SERVE_STATIC == "1" {
+		server.Static("/css", STATIC_DIR+"/css")
+		server.Static("/js", STATIC_DIR+"/js")
+		server.LoadHTMLGlob(STATIC_DIR + "/*.html")
+	}
 
 	// For SPA on vue
 	server.NoRoute(func(ctx *gin.Context) {
@@ -89,22 +93,24 @@ func main() {
 			gamelistController.DeleteAllRefreshTokens,
 		)
 
-		// This will be replaced with gRPC call
-		apiRoutes.POST("/games", gamelistController.PostGame)
+		// This will be replaced with gRPC admin shell
+		if PRODUCTION_MODE == "0" {
+			apiRoutes.POST("/games", gamelistController.PostGame)
 
-		apiRoutes.POST("/list-types", gamelistController.PostListType)
-		apiRoutes.GET("/list-types", gamelistController.GetAllListTypes)
+			apiRoutes.POST("/list-types", gamelistController.PostListType)
+			apiRoutes.GET("/list-types", gamelistController.GetAllListTypes)
 
-		apiRoutes.GET("/genres", gamelistController.GetAllGenres)
-		apiRoutes.POST("/genres", gamelistController.PostGenre)
+			apiRoutes.GET("/genres", gamelistController.GetAllGenres)
+			apiRoutes.POST("/genres", gamelistController.PostGenre)
 
-		apiRoutes.GET("/platforms", gamelistController.GetAllPlatforms)
-		apiRoutes.POST("/platforms", gamelistController.PostPlatform)
+			apiRoutes.GET("/platforms", gamelistController.GetAllPlatforms)
+			apiRoutes.POST("/platforms", gamelistController.PostPlatform)
 
-		apiRoutes.GET("/profiles", gamelistController.GetAllProfiles)
+			apiRoutes.GET("/profiles", gamelistController.GetAllProfiles)
 
-		apiRoutes.GET("/social-types", gamelistController.GetAllSocialtypes)
-		apiRoutes.POST("/social-types", gamelistController.PostSocialType)
+			apiRoutes.GET("/social-types", gamelistController.GetAllSocialtypes)
+			apiRoutes.POST("/social-types", gamelistController.PostSocialType)
+		}
 	}
 
 	server.Run(":8080")

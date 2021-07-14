@@ -58,6 +58,17 @@ func NewGamelistRepository(dbName string, forceMigrate bool) GamelistRepository 
 		db.AutoMigrate(&entity.GameProperties{}, &entity.Genre{},
 			&entity.Platform{}, &entity.Profile{}, &entity.RefreshToken{}, &entity.Social{},
 			&entity.SocialType{}, &entity.ProfileGame{}, &entity.ListType{})
+
+		// Add default list types for first db creation
+		if os.IsNotExist(err) {
+			listTypes := []entity.ListType{
+				{Name: "Played"},
+				{Name: "Playing"},
+				{Name: "Want to play"},
+			}
+
+			db.Create(&listTypes)
+		}
 	} else {
 		db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
 		if err != nil {

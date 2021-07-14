@@ -13,7 +13,7 @@ import (
 
 var (
 	FORCE_MIGRATE        string = helpers.GetEnvOrDefault("FORCE_MIGRATE", "0")
-	FORCE_SCRAPE         string = helpers.GetEnvOrDefault("FORCE_MIGRATE", "0")
+	FORCE_SCRAPE         string = helpers.GetEnvOrDefault("FORCE_SCRAPE", "0")
 	STATIC_DIR           string = helpers.GetEnvOrDefault("STATIC_FOLDER", "../gamelist-frontend/gamelist/dist")
 	DATABASE_DIR         string = helpers.GetEnvOrDefault("DATABASE_DIR", "gamelist.db")
 	SCRAPER_GRPC_ADDRESS string = helpers.GetEnvOrDefault("SCRAPER_GRPC_ADDRESS", "localhost")
@@ -26,7 +26,7 @@ func main() {
 
 	var (
 		// Repos
-		gamelistRepository = repository.NewGamelistRepository(DATABASE_DIR, FORCE_MIGRATE == "1")
+		gamelistRepository = repository.NewGamelistRepository(DATABASE_DIR+"/gamelist.db", FORCE_MIGRATE == "1")
 
 		// Services
 		gamelistService service.GameListService = service.NewGameListService(gamelistRepository, SCRAPER_GRPC_ADDRESS)

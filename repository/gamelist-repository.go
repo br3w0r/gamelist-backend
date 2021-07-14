@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"bitbucket.org/br3w0r/gamelist-backend/entity"
@@ -60,7 +61,8 @@ func NewGamelistRepository(dbName string, forceMigrate bool) GamelistRepository 
 			&entity.SocialType{}, &entity.ProfileGame{}, &entity.ListType{})
 
 		// Add default list types for db creation
-		if os.IsNotExist(err) {
+		if !forceMigrate {
+			log.Println("Creating default list types...")
 			listTypes := []entity.ListType{
 				{Name: "Played"},
 				{Name: "Playing"},

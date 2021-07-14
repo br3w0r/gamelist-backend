@@ -17,7 +17,7 @@ var (
 	FORCE_MIGRATE        string = helpers.GetEnvOrDefault("FORCE_MIGRATE", "0")
 	FORCE_SCRAPE         string = helpers.GetEnvOrDefault("FORCE_SCRAPE", "0")
 	STATIC_DIR           string = helpers.GetEnvOrDefault("STATIC_FOLDER", "../gamelist-frontend/gamelist/dist")
-	DATABASE_DIR         string = helpers.GetEnvOrDefault("DATABASE_DIR", "gamelist.db")
+	DATABASE_DIR         string = helpers.GetEnvOrDefault("DATABASE_DIR", ".")
 	SCRAPER_GRPC_ADDRESS string = helpers.GetEnvOrDefault("SCRAPER_GRPC_ADDRESS", "localhost")
 )
 

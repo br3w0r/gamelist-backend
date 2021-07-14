@@ -1,49 +1,51 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"net/http"
 
 	"bitbucket.org/br3w0r/gamelist-backend/controller"
+	"bitbucket.org/br3w0r/gamelist-backend/helpers"
 	"bitbucket.org/br3w0r/gamelist-backend/repository"
 	"bitbucket.org/br3w0r/gamelist-backend/service"
 	"github.com/gin-gonic/gin"
 )
 
-func main() {
-	var (
-		migrate     *bool = flag.Bool("migrate", false, "Force AutoMigrate if true")
-		forceScrape *bool = flag.Bool("force-scrape", false, "Force all games scraping")
-	)
-	flag.Parse()
+var (
+	FORCE_MIGRATE        string = helpers.GetEnvOrDefault("FORCE_MIGRATE", "0")
+	FORCE_SCRAPE         string = helpers.GetEnvOrDefault("FORCE_MIGRATE", "0")
+	STATIC_DIR           string = helpers.GetEnvOrDefault("STATIC_FOLDER", "../gamelist-frontend/gamelist/dist")
+	DATABASE_DIR         string = helpers.GetEnvOrDefault("DATABASE_DIR", "gamelist.db")
+	SCRAPER_GRPC_ADDRESS string = helpers.GetEnvOrDefault("SCRAPER_GRPC_ADDRESS", "localhost")
+)
 
-	if *migrate {
+func main() {
+	if FORCE_MIGRATE == "1" {
 		log.Println("Force migration.")
 	}
 
 	var (
 		// Repos
-		gamelistRepository = repository.NewGamelistRepository("gamelist.db", *migrate)
+		gamelistRepository = repository.NewGamelistRepository(DATABASE_DIR, FORCE_MIGRATE == "1")
 
 		// Services
-		gamelistService service.GameListService = service.NewGameListService(gamelistRepository)
+		gamelistService service.GameListService = service.NewGameListService(gamelistRepository, SCRAPER_GRPC_ADDRESS)
 		jwtService      service.JWTService      = service.NewJWTService(gamelistRepository)
 
 		// Controllers
 		gamelistController controller.GameListController = controller.NewGameListController(gamelistService, jwtService)
 	)
 
-	if *forceScrape {
+	if FORCE_SCRAPE == "1" {
 		log.Println("Force scraping.")
 		go gamelistService.ScrapeGames()
 	}
 
 	server := gin.Default()
 
-	server.Static("/css", "../gamelist-frontend/gamelist/dist/css")
-	server.Static("/js", "../gamelist-frontend/gamelist/dist/js")
-	server.LoadHTMLGlob("../gamelist-frontend/gamelist/dist/*.html")
+	server.Static("/css", STATIC_DIR+"/css")
+	server.Static("/js", STATIC_DIR+"/js")
+	server.LoadHTMLGlob(STATIC_DIR + "/*.html")
 
 	// For SPA on vue
 	server.NoRoute(func(ctx *gin.Context) {

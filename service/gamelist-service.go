@@ -44,11 +44,12 @@ type GameListService interface {
 }
 
 type gameListService struct {
-	repo repository.GamelistRepository
+	repo               repository.GamelistRepository
+	scraperGRPCAddress string
 }
 
-func NewGameListService(repo repository.GamelistRepository) GameListService {
-	return &gameListService{repo}
+func NewGameListService(repo repository.GamelistRepository, scraperGRPCAddress string) GameListService {
+	return &gameListService{repo, scraperGRPCAddress}
 }
 
 func (s *gameListService) SaveGame(game entity.GameProperties) error {
@@ -161,7 +162,7 @@ func (s *gameListService) ScrapeGames() {
 	// Connection
 	opts := []grpc.DialOption{grpc.WithInsecure(), grpc.WithBlock()}
 
-	conn, err := grpc.Dial("localhost:8888", opts...)
+	conn, err := grpc.Dial(s.scraperGRPCAddress+":8888", opts...)
 	if err != nil {
 		log.Printf("failed to dial: %v", err)
 		return

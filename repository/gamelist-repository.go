@@ -59,7 +59,7 @@ func NewGamelistRepository(dbName string, forceMigrate bool) GamelistRepository 
 			&entity.Platform{}, &entity.Profile{}, &entity.RefreshToken{}, &entity.Social{},
 			&entity.SocialType{}, &entity.ProfileGame{}, &entity.ListType{})
 
-		// Add default list types for first db creation
+		// Add default list types for db creation
 		if os.IsNotExist(err) {
 			listTypes := []entity.ListType{
 				{Name: "Played"},

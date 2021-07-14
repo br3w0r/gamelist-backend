@@ -43,6 +43,10 @@ func main() {
 		go gamelistService.ScrapeGames()
 	}
 
+	if PRODUCTION_MODE == "1" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	server := gin.Default()
 
 	if SERVE_STATIC == "1" {

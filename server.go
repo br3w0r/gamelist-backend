@@ -62,7 +62,7 @@ func main() {
 
 	apiRoutes := server.Group("/api/v0")
 	{
-		apiRoutes.GET("/games/all",
+		apiRoutes.POST("/games/all",
 			gamelistController.Authorized,
 			gamelistController.GetAllGamesTyped,
 		)

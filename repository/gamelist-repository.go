@@ -14,7 +14,7 @@ import (
 type GamelistRepository interface {
 	SaveGame(game entity.GameProperties) error
 	GetAllGames() []entity.GameProperties
-	GetAllGamesTyped(nickname string) []entity.TypedGameListProperties
+	GetAllGamesTyped(nickname string, last uint64, batchSize int) []entity.TypedGameListProperties
 	GetUserGameList(nickname string) []entity.TypedGameListProperties
 	SearchGames(name string) []entity.GameSearchResult
 	GetGameDetails(nickname string, id uint64) (*entity.GameDetailsResponse, error)
@@ -46,6 +46,10 @@ type GamelistRepository interface {
 type gameListRepository struct {
 	db *gorm.DB
 }
+
+var (
+	GAMES_BATCH_SIZE_LIMIT int = 10
+)
 
 func NewGamelistRepository(dbName string, forceMigrate bool) GamelistRepository {
 	var db *gorm.DB
@@ -105,7 +109,11 @@ func (r *gameListRepository) GetAllGames() []entity.GameProperties {
 	return games
 }
 
-func (r *gameListRepository) GetAllGamesTyped(nickname string) []entity.TypedGameListProperties {
+func (r *gameListRepository) GetAllGamesTyped(nickname string, last uint64, batchSize int) []entity.TypedGameListProperties {
+	if batchSize > GAMES_BATCH_SIZE_LIMIT {
+		batchSize = GAMES_BATCH_SIZE_LIMIT
+	}
+
 	userId, err := r.findUserIDByNickname(nickname)
 	if err != nil {
 		return nil
@@ -113,6 +121,8 @@ func (r *gameListRepository) GetAllGamesTyped(nickname string) []entity.TypedGam
 	var games []entity.TypedGameListProperties
 	r.db.Table("game_properties").
 		Joins("left join profile_games on game_properties.id = profile_games.game_id and profile_games.profile_id = ?", userId).
+		Where("game_properties.id > ?", last).
+		Limit(batchSize).
 		Scan(&games)
 
 	return games

@@ -16,7 +16,7 @@ import (
 type GameListService interface {
 	SaveGame(game entity.GameProperties) error
 	GetAllGames() []entity.GameProperties
-	GetAllGamesTyped(nickname string) []entity.TypedGameListProperties
+	GetAllGamesTyped(nickname string, last uint64, batchSize int) []entity.TypedGameListProperties
 	GetUserGameList(nickname string) []entity.TypedGameListProperties
 	SearchGames(name string) []entity.GameSearchResult
 	GetGameDetails(nickname string, gameId uint64) (*entity.GameDetailsResponse, error)
@@ -60,8 +60,8 @@ func (s *gameListService) GetAllGames() []entity.GameProperties {
 	return s.repo.GetAllGames()
 }
 
-func (s *gameListService) GetAllGamesTyped(nickname string) []entity.TypedGameListProperties {
-	return s.repo.GetAllGamesTyped(nickname)
+func (s *gameListService) GetAllGamesTyped(nickname string, last uint64, batchSize int) []entity.TypedGameListProperties {
+	return s.repo.GetAllGamesTyped(nickname, last, batchSize)
 }
 
 func (s *gameListService) GetUserGameList(nickname string) []entity.TypedGameListProperties {

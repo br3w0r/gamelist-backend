@@ -56,3 +56,8 @@ type GameDetailsResponse struct {
 	Platforms []Platform              `json:"platforms"`
 	Genres    []Genre                 `json:"genres"`
 }
+
+type GameBatchRequest struct {
+	Last      uint64 `json:"last"`
+	BatchSize int    `json:"batch_size"`
+}

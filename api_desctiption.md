@@ -4,7 +4,14 @@
 
 **TO DO:** Resolve how to manage data chunks
 
-Request: empty or filter
+Request:
+
+```json
+{
+    "last": int, // ID of last game entry on client
+    "batch_size": int // amount of games to be sent to client from server
+}
+```
 
 Chunk structure:
 

@@ -65,7 +65,13 @@ func (c *gameListController) GetAllGames(ctx *gin.Context) {
 
 func (c *gameListController) GetAllGamesTyped(ctx *gin.Context) {
 	nickname := ctx.MustGet("nickname").(string)
-	ctx.JSON(http.StatusOK, c.gamelistService.GetAllGamesTyped(nickname))
+	var request entity.GameBatchRequest
+	err := ctx.ShouldBindJSON(&request)
+	if err != nil {
+		ErrorSender(ctx, err)
+	} else {
+		ctx.JSON(http.StatusOK, c.gamelistService.GetAllGamesTyped(nickname, request.Last, request.BatchSize))
+	}
 }
 
 func (c *gameListController) GetMyGameList(ctx *gin.Context) {

@@ -1,8 +1,22 @@
 # API Description
 
-## Get all games (/games/all)
+All api requests have this url structure: `<address>/api/v0/<API>` where `<API>` is a route of api action (in brackets bellow).
 
-**TO DO:** Resolve how to manage data chunks
+## Authorization
+
+Nearly all of requests require authorization. Authorization header structure:
+
+`Authorization: Bearer <token>`
+
+List of routes that don't require authorization:
+
+- POST /profiles
+- /aquire-tokens
+- /refresh-tokens
+- /revoke-token
+- not in production mode: all POST and GET requests for genres, platforms, social types and GET methods for profiles and game properties.
+
+## [POST] Get all games (/games/all)
 
 Request:
 
@@ -13,39 +27,24 @@ Request:
 }
 ```
 
-Chunk structure:
+Response: list of `<typed_game_properties>` with size of `<batch_size>`, but not more than 10.
 
-```json
-[
-    <game_properties>,
-    "user_list": int
-]
-```
+## [GET] Get games of authorized user (/my-games)
 
-## Get profile list (/games/list/<profile_id:int>)
+Response: list of `<typed_game_properties>`
 
-Reuest: empty or filter
+## [POST] Add game to list (/list-game)
 
-Response:
-
-```json
-[
-    <game_properties>
-]
-```
-
-## Games filter
-
-A query added to related requests
+Request:
 
 ```json
 {
-    "filter": int, // 0 - genre, 1 - listed count, 2 - platform
-    "ascending" bool
+    "game_id": int,
+    "list_type": int
 }
 ```
 
-## Search (/games/search)
+## [POST] Search (/games/search)
 
 Request:
 
@@ -60,12 +59,127 @@ Response:
 ```json
 {
     "games": [
-        <game_properties("name", "platforms", "year_released")>
+        <game_properties("id", "name")>
     ]
 }
 ```
 
-## Get profile (/profile/<nickname:str>)
+## [POST] Get game details (/games/details)
+
+Request:
+
+```json
+{
+    "id": int
+}
+```
+
+Response:
+
+```json
+{
+    "game": <typed_game_properties>,
+    "platforms": [
+        <platform>
+    ],
+    "genres": [
+        <genre>
+    ]
+}
+```
+
+## [POST] Sign Up (/profiles)
+
+Request: `profile_info` data structure
+
+## [POST] Aquire new JWT tokens (/aquire-tokens)
+
+Request:
+
+```json
+{
+    "nickname": string,
+    "email": string,
+    "password": string
+}
+```
+
+It's required that at least email or password where in the request, but not necessarily both of them.
+
+Response:
+
+```json
+{
+    "token": string,
+    "refresh_token": string
+}
+```
+
+## [POST] Refresh tokens (/refresh-tokens)
+
+Request:
+
+```json
+{
+    "refresh_token": string
+}
+```
+
+Response:
+
+```json
+{
+    "token": string,
+    "refresh_token": string
+}
+```
+
+## [POST] Revoke refresh token (/revoke-token)
+
+Request:
+
+```json
+{
+    "refresh_token": string
+}
+```
+
+## [GET] Delete all refresh tokens (/delete-all-refresh-tokens)
+
+## [POST] Add game (/games)
+
+## [GET][POST] List types (/list-types)
+
+## [GET][POST] Genres (/genres)
+
+## [GET][POST] Platforms (/platforms)
+
+## [GET][POST] Social Types (/social-types)
+
+## [NOT IMPLEMENTED] Get profile list (/games/list/<profile_id:int>)
+
+Reuest: empty or filter
+
+Response:
+
+```json
+[
+    <game_properties>
+]
+```
+
+## [NOT IMPLEMENTED] Games filter
+
+A query added to related requests
+
+```json
+{
+    "filter": int, // 0 - genre, 1 - listed count, 2 - platform
+    "ascending" bool
+}
+```
+
+## [NOT IMPLEMENTED] Get profile (/profiles/<nickname:str>)
 
 Request: empty
 
@@ -77,19 +191,8 @@ Response:
 }
 ```
 
-## Update profile info (/profile)
+## [NOT IMPLEMENTED] Update profile info (/profiles)
 
 Request: any field of a <profile_info>
 
 Response: updated fields of this profile
-
-## Add game to list (/games/list/add)
-
-Request:
-
-```json
-{
-    "game_id": int,
-    "list_type": int
-}
-```

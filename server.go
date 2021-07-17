@@ -53,12 +53,12 @@ func main() {
 		server.Static("/css", STATIC_DIR+"/css")
 		server.Static("/js", STATIC_DIR+"/js")
 		server.LoadHTMLGlob(STATIC_DIR + "/*.html")
-	}
 
-	// For SPA on vue
-	server.NoRoute(func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, "index.html", nil)
-	})
+		// For SPA on vue
+		server.NoRoute(func(ctx *gin.Context) {
+			ctx.HTML(http.StatusOK, "index.html", nil)
+		})
+	}
 
 	apiRoutes := server.Group("/api/v0")
 	{

@@ -1,4 +1,4 @@
-module bitbucket.org/br3w0r/gamelist-backend
+module github.com/br3w0r/gamelist-backend
 
 go 1.16
 

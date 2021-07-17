@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
-	"bitbucket.org/br3w0r/gamelist-backend/entity"
-	pb "bitbucket.org/br3w0r/gamelist-backend/proto"
-	"bitbucket.org/br3w0r/gamelist-backend/repository"
+	"github.com/br3w0r/gamelist-backend/entity"
+	pb "github.com/br3w0r/gamelist-backend/proto"
+	"github.com/br3w0r/gamelist-backend/repository"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 )

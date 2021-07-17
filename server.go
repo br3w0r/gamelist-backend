@@ -4,10 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"bitbucket.org/br3w0r/gamelist-backend/controller"
-	"bitbucket.org/br3w0r/gamelist-backend/helpers"
-	"bitbucket.org/br3w0r/gamelist-backend/repository"
-	"bitbucket.org/br3w0r/gamelist-backend/service"
+	"github.com/br3w0r/gamelist-backend/controller"
+	"github.com/br3w0r/gamelist-backend/helpers"
+	"github.com/br3w0r/gamelist-backend/repository"
+	"github.com/br3w0r/gamelist-backend/service"
 	"github.com/gin-gonic/gin"
 )
 

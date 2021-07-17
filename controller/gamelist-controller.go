@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"bitbucket.org/br3w0r/gamelist-backend/entity"
-	"bitbucket.org/br3w0r/gamelist-backend/service"
+	"github.com/br3w0r/gamelist-backend/entity"
+	"github.com/br3w0r/gamelist-backend/service"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

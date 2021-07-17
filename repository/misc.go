@@ -3,7 +3,7 @@ package repository
 import (
 	"fmt"
 
-	"bitbucket.org/br3w0r/gamelist-backend/entity"
+	"github.com/br3w0r/gamelist-backend/entity"
 	"gorm.io/gorm"
 )
 

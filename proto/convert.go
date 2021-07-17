@@ -1,8 +1,8 @@
 package proto
 
 import (
-	"bitbucket.org/br3w0r/gamelist-backend/entity"
-	"bitbucket.org/br3w0r/gamelist-backend/helpers"
+	"github.com/br3w0r/gamelist-backend/entity"
+	"github.com/br3w0r/gamelist-backend/helpers"
 )
 
 func (g *GameProperties) ConvertToEntity() entity.GameProperties {

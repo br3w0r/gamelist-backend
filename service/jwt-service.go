@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"bitbucket.org/br3w0r/gamelist-backend/entity"
-	"bitbucket.org/br3w0r/gamelist-backend/repository"
+	"github.com/br3w0r/gamelist-backend/entity"
+	"github.com/br3w0r/gamelist-backend/repository"
 	"github.com/golang-jwt/jwt"
 )
 

@@ -4,15 +4,28 @@
 
 ```json
 {
+    "id": int,
     "name": string,
-    "platforms": [
+    "platforms": [ // This field currently doesn't work
         <platform>
     ],
     "year_released": int,
     "image_url": string,
-    "genres": [
+    "genres": [ // This field currently doesn't work
         <genre>
     ]
+}
+```
+
+## Typed game properties
+
+```json
+{
+    "id": int,
+    "name": string,
+    "year_released": int,
+    "image_url": string,
+    "user_list": int // List type of game (0 - Unlisted, 1 - Playing, etc.)
 }
 ```
 
@@ -34,8 +47,11 @@
 
 ## Profile info
 
+Currently it's used only for profile creation.
+
 ```json
 {
+    "id": int,
     "nickname": string,
     "description": string,
     "games_listed": int,

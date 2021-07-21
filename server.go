@@ -3,11 +3,13 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/br3w0r/gamelist-backend/controller"
 	"github.com/br3w0r/gamelist-backend/helpers"
 	"github.com/br3w0r/gamelist-backend/repository"
 	"github.com/br3w0r/gamelist-backend/service"
+	test "github.com/br3w0r/gamelist-backend/test/stress"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,6 +21,8 @@ var (
 	STATIC_DIR           string = helpers.GetEnvOrDefault("STATIC_FOLDER", "../gamelist-frontend/gamelist/dist")
 	DATABASE_DIR         string = helpers.GetEnvOrDefault("DATABASE_DIR", ".")
 	SCRAPER_GRPC_ADDRESS string = helpers.GetEnvOrDefault("SCRAPER_GRPC_ADDRESS", "localhost")
+	STRESS_TEST          string = helpers.GetEnvOrDefault("STRESS_TEST", "0")
+	STRESS_TEST_OPTIONS  string = helpers.GetEnvOrDefault("STRESS_TEST_OPTIONS", "user_creation,get_game=75,get_all_games,get_user_games")
 )
 
 func main() {
@@ -26,9 +30,16 @@ func main() {
 		log.Println("Force migration.")
 	}
 
+	var dbDist string
+	if STRESS_TEST == "1" {
+		dbDist = DATABASE_DIR + "/stress.db"
+	} else {
+		dbDist = DATABASE_DIR + "/gamelist.db"
+	}
+
 	var (
 		// Repos
-		gamelistRepository = repository.NewGamelistRepository(DATABASE_DIR+"/gamelist.db", FORCE_MIGRATE == "1")
+		gamelistRepository repository.GamelistRepository = repository.NewGamelistRepository(dbDist, FORCE_MIGRATE == "1")
 
 		// Services
 		gamelistService service.GameListService = service.NewGameListService(gamelistRepository, SCRAPER_GRPC_ADDRESS)
@@ -40,7 +51,17 @@ func main() {
 
 	if FORCE_SCRAPE == "1" {
 		log.Println("Force scraping.")
-		go gamelistService.ScrapeGames()
+
+		if STRESS_TEST == "1" {
+			gamelistService.ScrapeGames()
+		} else {
+			go gamelistService.ScrapeGames()
+		}
+	}
+
+	if STRESS_TEST == "1" {
+		test.RunStress(gamelistRepository, strings.Split(STRESS_TEST_OPTIONS, ","))
+		return
 	}
 
 	if PRODUCTION_MODE == "1" {

@@ -29,6 +29,26 @@ func getGame(repo repository.GamelistRepository, n uint64) {
 	}
 }
 
+func userCreation(repo repository.GamelistRepository, n uint64) {
+	var i uint64
+	for i = 1; i <= n; i++ {
+		repo.CreateProfile(entity.Profile{
+			ProfileInfo: entity.ProfileInfo{
+				Nickname: fmt.Sprintf("test%d", i),
+			},
+			Email:    fmt.Sprintf("test%d@mail.com", i),
+			Password: "123",
+		})
+	}
+}
+
+func findUser(repo repository.GamelistRepository, n uint64) {
+	var i uint64
+	for i = 1; i <= n; i++ {
+		repo.GetProfile(entity.ProfileCreds{Nickname: fmt.Sprintf("test%d", i)})
+	}
+}
+
 func RunStress(repo repository.GamelistRepository, options []string) {
 	repo.CreateProfile(entity.Profile{
 		ProfileInfo: entity.ProfileInfo{
@@ -43,8 +63,22 @@ func RunStress(repo repository.GamelistRepository, options []string) {
 		t := time.Now()
 		op := strings.Split(i, "=")
 		switch op[0] {
-		case "user_creation", "get_user_games", "get_all_games": // These tests will be implemented soon
+		case "get_user_games", "get_all_games": // These tests will be implemented soon
 			log.Printf("%s unimplemented", op[0])
+		case "user_creation":
+			n, err := parseEntries(op)
+			if err != nil {
+				log.Println(err.Error())
+			} else {
+				userCreation(repo, n)
+			}
+		case "find_user":
+			n, err := parseEntries(op)
+			if err != nil {
+				log.Println(err.Error())
+			} else {
+				findUser(repo, n)
+			}
 		case "get_game":
 			n, err := parseEntries(op)
 			if err != nil {

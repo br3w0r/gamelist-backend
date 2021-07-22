@@ -1,3 +1,6 @@
+# IDE folder
+.vscode/
+
 # Binaries for programs and plugins
 *.exe
 *.exe~

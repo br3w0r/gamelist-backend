@@ -218,16 +218,21 @@ func (c *gameListController) DeleteAllRefreshTokens(ctx *gin.Context) {
 
 func (c *gameListController) Authorized(ctx *gin.Context) {
 	var token string
-	list := strings.Split(ctx.Request.Header["Authorization"][0], " ")
-	if len(list) != 2 || list[0] != "Bearer" {
+	authHeader, ok := ctx.Request.Header["Authorization"]
+	if !ok {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
 	} else {
-		token = list[1]
-		nickname, err := c.jwtService.Authenticate(token)
-		if err != nil {
+		list := strings.Split(authHeader[0], " ")
+		if len(list) != 2 || list[0] != "Bearer" {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
 		} else {
-			ctx.Set("nickname", nickname)
+			token = list[1]
+			nickname, err := c.jwtService.Authenticate(token)
+			if err != nil {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
+			} else {
+				ctx.Set("nickname", nickname)
+			}
 		}
 	}
 }

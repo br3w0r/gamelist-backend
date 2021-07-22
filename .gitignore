@@ -23,8 +23,5 @@ vendor/
 # Debug file
 __debug_bin
 
-# Linux build for server
-server
-
 # Start script for linux
 start.sh

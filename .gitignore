@@ -18,7 +18,7 @@
 vendor/
 
 # Database
-*.db
+*.db*
 
 # Debug file
 __debug_bin

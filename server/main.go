@@ -22,6 +22,7 @@ type ServerOptions struct {
 	ScraperAsync       bool
 	StressTest         bool
 	StressTestOptions  []string
+	SilentMode         bool
 }
 
 func NewServer(options ServerOptions) *gin.Engine {
@@ -61,7 +62,12 @@ func NewServer(options ServerOptions) *gin.Engine {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	server := gin.Default()
+	server := gin.New()
+
+	server.Use(gin.Recovery())
+	if !options.SilentMode {
+		server.Use(gin.Logger())
+	}
 
 	if options.ServeStatic {
 		server.Static("/css", options.StaticDir+"/css")

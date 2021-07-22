@@ -50,7 +50,7 @@ func genericRequest(server *gin.Engine, method string, url string, options reque
 func TestServer(t *testing.T) {
 	// Initializing server with test db
 	options := ServerOptions{
-		Production:         false,
+		Production:         true,
 		ServeStatic:        false,
 		ForceMigrate:       false,
 		ForceScrape:        true,
@@ -58,6 +58,7 @@ func TestServer(t *testing.T) {
 		DatabaseDist:       "./test.db",
 		ScraperGRPCAddress: "localhost",
 		StressTest:         false,
+		SilentMode:         true,
 	}
 
 	server := NewServer(options)

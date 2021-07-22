@@ -37,6 +37,7 @@ func main() {
 		ScraperAsync:       scraperAsync,
 		StressTest:         STRESS_TEST == "1",
 		StressTestOptions:  strings.Split(STRESS_TEST_OPTIONS, ","),
+		SilentMode:         false,
 	}
 
 	server := server.NewServer(options)

@@ -15,6 +15,8 @@ COPY proto/ proto/
 COPY helpers/ helpers/
 COPY entity/ entity/
 COPY controller/ controller/
+COPY server/ server/
+COPY test/stress/ test/stress
 
 RUN go build -o /server
 

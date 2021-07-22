@@ -49,7 +49,7 @@ This will connect to scraper gRPC server on localhost and fetch the games.
     -e SERVE_STATIC=0 \
     -e PRODUCTION_MODE=1 \
     -e STATIC_FOLDER=/static \
-    -e DATABASE_DIR=/data \
+    -e DATABASE_DIST=/data/gamelist.db \
     -e FORCE_SCRAPE=0 \
     -e SCRAPER_GRPC_ADDRESS=scraper \
     gamelist-backend

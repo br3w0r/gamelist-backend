@@ -17,7 +17,7 @@ type ServerOptions struct {
 	ForceMigrate       bool
 	ForceScrape        bool
 	StaticDir          string
-	DatabaseDir        string
+	DatabaseDist       string
 	ScraperGRPCAddress string
 	StressTest         bool
 	StressTestOptions  []string
@@ -28,16 +28,9 @@ func NewServer(options ServerOptions) *gin.Engine {
 		log.Println("Force migration.")
 	}
 
-	var dbDist string
-	if options.StressTest {
-		dbDist = options.DatabaseDir + "/stress.db"
-	} else {
-		dbDist = options.DatabaseDir + "/gamelist.db"
-	}
-
 	var (
 		// Repos
-		gamelistRepository repository.GamelistRepository = repository.NewGamelistRepository(dbDist, options.ForceMigrate)
+		gamelistRepository repository.GamelistRepository = repository.NewGamelistRepository(options.DatabaseDist, options.ForceMigrate)
 
 		// Services
 		gamelistService service.GameListService = service.NewGameListService(gamelistRepository, options.ScraperGRPCAddress)

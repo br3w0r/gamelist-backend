@@ -65,7 +65,7 @@ func TestServer(t *testing.T) {
 
 	defer os.Remove("./test.db")
 
-	Convey("Create profile shoud return ok status", t,
+	Convey("Create profile should return ok status", t,
 		genericRequest(server, "POST", "http://localhost/api/v0/profiles",
 			requestOptions{
 				Body: `
@@ -91,7 +91,7 @@ func TestServer(t *testing.T) {
 			ResponseStructPointer: &tokenPair,
 		}))
 
-	Convey("Refresh token pair shoud return new refresh and authorization token pair", t,
+	Convey("Refresh token pair should return new refresh and authorization token pair", t,
 		genericRequest(server, "POST", "http://localhost/api/v0/refresh-tokens", requestOptions{
 			Body: fmt.Sprintf(`
 				{

@@ -310,8 +310,6 @@ func (r *gameListRepository) FindRefreshToken(nickname string, tokenString strin
 		return err
 	}
 
-	fmt.Println(len(result), result)
-
 	if len(result) == 0 {
 		return gorm.ErrRecordNotFound
 	}

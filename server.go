@@ -20,6 +20,12 @@ var (
 )
 
 func main() {
+	var scraperAsync bool
+	if STRESS_TEST == "1" {
+		scraperAsync = true
+	} else {
+		scraperAsync = false
+	}
 	options := server.ServerOptions{
 		Production:         PRODUCTION_MODE == "1",
 		ServeStatic:        SERVE_STATIC == "1",
@@ -28,6 +34,7 @@ func main() {
 		StaticDir:          STATIC_DIR,
 		DatabaseDist:       DATABASE_DIST,
 		ScraperGRPCAddress: SCRAPER_GRPC_ADDRESS,
+		ScraperAsync:       scraperAsync,
 		StressTest:         STRESS_TEST == "1",
 		StressTestOptions:  strings.Split(STRESS_TEST_OPTIONS, ","),
 	}

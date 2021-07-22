@@ -19,6 +19,7 @@ type ServerOptions struct {
 	StaticDir          string
 	DatabaseDist       string
 	ScraperGRPCAddress string
+	ScraperAsync       bool
 	StressTest         bool
 	StressTestOptions  []string
 }
@@ -43,10 +44,10 @@ func NewServer(options ServerOptions) *gin.Engine {
 	if options.ForceScrape {
 		log.Println("Force scraping.")
 
-		if options.StressTest {
-			gamelistService.ScrapeGames()
-		} else {
+		if options.ScraperAsync {
 			go gamelistService.ScrapeGames()
+		} else {
+			gamelistService.ScrapeGames()
 		}
 	}
 

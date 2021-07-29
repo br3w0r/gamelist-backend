@@ -8,7 +8,7 @@ import (
 
 type GameProperties struct {
 	Model
-	Name         string     `gorm:"unique;uniqueIndex" json:"name" binding:"required"`
+	Name         string     `gorm:"unique;uniqueIndex:,class:FULLTEXT" json:"name" binding:"required"`
 	Platforms    []Platform `gorm:"many2many:game_platforms" json:"-"`
 	ImageURL     string     `json:"image_url" binding:"required,url"`
 	YearReleased uint16     `json:"year_released" binding:"required,gte=1000"`

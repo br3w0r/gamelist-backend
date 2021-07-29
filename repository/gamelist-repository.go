@@ -141,9 +141,8 @@ func (r *gameListRepository) GetUserGameList(nickname string) []entity.TypedGame
 
 func (r *gameListRepository) SearchGames(name string) []entity.GameSearchResult {
 	var games []entity.GameSearchResult
-	fmt.Println(len(name))
 	if len(name) > 1 {
-		r.db.Table("game_properties").Where("name LIKE ?", "%"+name+"%").Limit(10).Find(&games)
+		r.db.Table("game_properties").Where("name LIKE ?", name+"%").Limit(10).Find(&games)
 	}
 	return games
 }

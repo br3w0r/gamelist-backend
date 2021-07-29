@@ -42,5 +42,7 @@ func main() {
 
 	server := server.NewServer(options)
 
-	server.Run(":8080")
+	if !options.StressTest {
+		server.Run(":8080")
+	}
 }

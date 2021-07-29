@@ -49,6 +49,15 @@ func findUser(repo repository.GamelistRepository, n uint64) {
 	}
 }
 
+func findGames(repo repository.GamelistRepository) {
+	games := repo.GetAllGames()
+
+	for _, game := range games {
+		name := game.Name[:len(game.Name)/2]
+		repo.SearchGames(name)
+	}
+}
+
 func RunStress(repo repository.GamelistRepository, options []string) {
 	repo.CreateProfile(entity.Profile{
 		ProfileInfo: entity.ProfileInfo{
@@ -86,6 +95,8 @@ func RunStress(repo repository.GamelistRepository, options []string) {
 			} else {
 				getGame(repo, n)
 			}
+		case "find_games":
+			findGames(repo)
 		default:
 			log.Printf("%s unimplemented", op[0])
 		}

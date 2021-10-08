@@ -48,6 +48,12 @@ func genericRequest(server *gin.Engine, method string, url string, options reque
 }
 
 func TestServer(t *testing.T) {
+	t.Log("TestServer requires a working scrapper instance to run")
+
+	if os.Getenv("CI") != "" {
+		t.Skip("TestServer doesn't support CI environment")
+	}
+
 	// Initializing server with test db
 	options := ServerOptions{
 		Production:         true,

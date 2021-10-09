@@ -3,10 +3,9 @@ package repository
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/br3w0r/gamelist-backend/entity"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -47,25 +46,56 @@ type gameListRepository struct {
 	db *gorm.DB
 }
 
+type DBConfig struct {
+	Host     string
+	Port     string
+	User     string
+	DBName   string
+	Password string
+	SSL      bool
+	TimeZone string
+}
+
 var (
 	GAMES_BATCH_SIZE_LIMIT int = 10
+	ErrDbConnection            = "Failed to connect database."
 )
 
-func NewGamelistRepository(dbName string, forceMigrate bool) GamelistRepository {
-	var db *gorm.DB
-	_, err := os.Stat(dbName)
+func NewDBDialector(conf *DBConfig) gorm.Dialector {
+	var sslString string
+	if conf.SSL {
+		sslString = "require"
+	} else {
+		sslString = "disable"
+	}
 
-	if os.IsNotExist(err) || forceMigrate {
-		db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
+	dsn := fmt.Sprint("host=", conf.Host,
+		" user=", conf.User,
+		" password=", conf.Password,
+		" dbname=", conf.DBName,
+		" port=", conf.Port,
+		" sslmode=", sslString,
+		" TimeZone=", conf.TimeZone,
+	)
+
+	return postgres.Open(dsn)
+}
+
+func NewGamelistRepository(dbName string, forceMigrate bool, dialector gorm.Dialector) GamelistRepository {
+	var db *gorm.DB
+	var err error
+
+	if forceMigrate {
+		db, err = gorm.Open(dialector, &gorm.Config{})
 		if err != nil {
-			panic("Failed to connect database.")
+			panic(ErrDbConnection)
 		}
 		db.AutoMigrate(&entity.GameProperties{}, &entity.Genre{},
-			&entity.Platform{}, &entity.Profile{}, &entity.RefreshToken{}, &entity.Social{},
-			&entity.SocialType{}, &entity.ProfileGame{}, &entity.ListType{})
+			&entity.Platform{}, &entity.Profile{}, &entity.RefreshToken{}, &entity.ProfileGame{},
+			&entity.Social{}, &entity.SocialType{}, &entity.ListType{})
 
-		// Add default list types for db creation
-		if !forceMigrate {
+		err := db.Model(&entity.ListType{}).First(nil).Error
+		if err == gorm.ErrRecordNotFound {
 			log.Println("Creating default list types...")
 			listTypes := []entity.ListType{
 				{Name: "Played"},
@@ -74,11 +104,13 @@ func NewGamelistRepository(dbName string, forceMigrate bool) GamelistRepository 
 			}
 
 			db.Create(&listTypes)
+		} else if err != nil {
+			panic("Failed to get first list type")
 		}
 	} else {
-		db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
+		db, err = gorm.Open(dialector, &gorm.Config{})
 		if err != nil {
-			panic("Failed to connect database.")
+			panic(ErrDbConnection)
 		}
 	}
 
@@ -133,7 +165,9 @@ func (r *gameListRepository) GetUserGameList(nickname string) []entity.TypedGame
 	r.db.Table("game_properties").Select(
 		"game_properties.id, game_properties.name, game_properties.image_url, game_properties.year_released, profile_games.list_type_id",
 	).Joins(
-		"join profiles, profile_games on game_properties.id = profile_games.game_id and profile_games.profile_id = profiles.id and profile_games.list_type_id != 0 and profiles.nickname = ?",
+		"join profile_games on game_properties.id = profile_games.game_id and profile_games.list_type_id != 0",
+	).Joins(
+		"join profiles on profile_games.profile_id = profiles.id and profiles.nickname = ?",
 		nickname,
 	).Scan(&games)
 	return games

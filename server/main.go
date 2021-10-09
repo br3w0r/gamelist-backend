@@ -23,6 +23,7 @@ type ServerOptions struct {
 	StressTest         bool
 	StressTestOptions  []string
 	SilentMode         bool
+	DBConfig           *repository.DBConfig
 }
 
 func NewServer(options ServerOptions) *gin.Engine {
@@ -31,8 +32,11 @@ func NewServer(options ServerOptions) *gin.Engine {
 	}
 
 	var (
+		// DB dialector init
+		dialector = repository.NewDBDialector(options.DBConfig)
+
 		// Repos
-		gamelistRepository repository.GamelistRepository = repository.NewGamelistRepository(options.DatabaseDist, options.ForceMigrate)
+		gamelistRepository repository.GamelistRepository = repository.NewGamelistRepository(options.DatabaseDist, options.ForceMigrate, dialector)
 
 		// Services
 		gamelistService service.GameListService = service.NewGameListService(gamelistRepository, options.ScraperGRPCAddress)

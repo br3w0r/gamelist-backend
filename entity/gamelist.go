@@ -57,7 +57,7 @@ type SocialType struct {
 }
 
 type ProfileGame struct {
-	Profile    ProfileInfo    `gorm:"foreignKey:ProfileID" json:"-"`
+	Profile    Profile        `gorm:"foreignKey:ProfileID" json:"-"`
 	ProfileID  uint64         `gorm:"primaryKey" json:"-"`
 	Game       GameProperties `gorm:"foreignKey:GameID" json:"game"`
 	GameID     uint64         `gorm:"primaryKey" json:"-"`

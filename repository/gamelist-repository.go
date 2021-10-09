@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/br3w0r/gamelist-backend/entity"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -47,22 +47,53 @@ type gameListRepository struct {
 	db *gorm.DB
 }
 
+type DBConfig struct {
+	Host     string
+	Port     string
+	User     string
+	DBName   string
+	Password string
+	SSL      bool
+	TimeZone string
+}
+
 var (
 	GAMES_BATCH_SIZE_LIMIT int = 10
+	ErrDbConnection            = "Failed to connect database."
 )
 
-func NewGamelistRepository(dbName string, forceMigrate bool) GamelistRepository {
+func NewDBDialector(conf *DBConfig) gorm.Dialector {
+	var sslString string
+	if conf.SSL {
+		sslString = "require"
+	} else {
+		sslString = "disable"
+	}
+
+	dsn := fmt.Sprint("host=", conf.Host,
+		" user=", conf.User,
+		" password=", conf.Password,
+		" dbname=", conf.DBName,
+		" port=", conf.Port,
+		" sslmode=", sslString,
+		" TimeZone=", conf.TimeZone,
+	)
+
+	return postgres.Open(dsn)
+}
+
+func NewGamelistRepository(dbName string, forceMigrate bool, dialector gorm.Dialector) GamelistRepository {
 	var db *gorm.DB
 	_, err := os.Stat(dbName)
 
-	if os.IsNotExist(err) || forceMigrate {
-		db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
+	if forceMigrate {
+		db, err = gorm.Open(dialector, &gorm.Config{})
 		if err != nil {
-			panic("Failed to connect database.")
+			panic(ErrDbConnection)
 		}
 		db.AutoMigrate(&entity.GameProperties{}, &entity.Genre{},
-			&entity.Platform{}, &entity.Profile{}, &entity.RefreshToken{}, &entity.Social{},
-			&entity.SocialType{}, &entity.ProfileGame{}, &entity.ListType{})
+			&entity.Platform{}, &entity.Profile{}, &entity.RefreshToken{}, &entity.ProfileGame{},
+			&entity.Social{}, &entity.SocialType{}, &entity.ListType{})
 
 		// Add default list types for db creation
 		if !forceMigrate {
@@ -76,9 +107,9 @@ func NewGamelistRepository(dbName string, forceMigrate bool) GamelistRepository 
 			db.Create(&listTypes)
 		}
 	} else {
-		db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
+		db, err = gorm.Open(dialector, &gorm.Config{})
 		if err != nil {
-			panic("Failed to connect database.")
+			panic(ErrDbConnection)
 		}
 	}
 

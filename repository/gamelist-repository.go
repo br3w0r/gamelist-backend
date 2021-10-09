@@ -3,7 +3,6 @@ package repository
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/br3w0r/gamelist-backend/entity"
 	"gorm.io/driver/postgres"
@@ -84,7 +83,7 @@ func NewDBDialector(conf *DBConfig) gorm.Dialector {
 
 func NewGamelistRepository(dbName string, forceMigrate bool, dialector gorm.Dialector) GamelistRepository {
 	var db *gorm.DB
-	_, err := os.Stat(dbName)
+	var err error
 
 	if forceMigrate {
 		db, err = gorm.Open(dialector, &gorm.Config{})

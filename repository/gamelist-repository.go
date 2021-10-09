@@ -94,8 +94,8 @@ func NewGamelistRepository(dbName string, forceMigrate bool, dialector gorm.Dial
 			&entity.Platform{}, &entity.Profile{}, &entity.RefreshToken{}, &entity.ProfileGame{},
 			&entity.Social{}, &entity.SocialType{}, &entity.ListType{})
 
-		// Add default list types for db creation
-		if !forceMigrate {
+		err := db.Model(&entity.ListType{}).First(nil).Error
+		if err == gorm.ErrRecordNotFound {
 			log.Println("Creating default list types...")
 			listTypes := []entity.ListType{
 				{Name: "Played"},
@@ -104,6 +104,8 @@ func NewGamelistRepository(dbName string, forceMigrate bool, dialector gorm.Dial
 			}
 
 			db.Create(&listTypes)
+		} else if err != nil {
+			panic("Failed to get first list type")
 		}
 	} else {
 		db, err = gorm.Open(dialector, &gorm.Config{})
@@ -163,7 +165,9 @@ func (r *gameListRepository) GetUserGameList(nickname string) []entity.TypedGame
 	r.db.Table("game_properties").Select(
 		"game_properties.id, game_properties.name, game_properties.image_url, game_properties.year_released, profile_games.list_type_id",
 	).Joins(
-		"join profiles, profile_games on game_properties.id = profile_games.game_id and profile_games.profile_id = profiles.id and profile_games.list_type_id != 0 and profiles.nickname = ?",
+		"join profile_games on game_properties.id = profile_games.game_id and profile_games.list_type_id != 0",
+	).Joins(
+		"join profiles on profile_games.profile_id = profiles.id and profiles.nickname = ?",
 		nickname,
 	).Scan(&games)
 	return games

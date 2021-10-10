@@ -2,7 +2,6 @@ package repository
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/br3w0r/gamelist-backend/entity"
 	"gorm.io/driver/postgres"
@@ -81,37 +80,13 @@ func NewDBDialector(conf *DBConfig) gorm.Dialector {
 	return postgres.Open(dsn)
 }
 
-func NewGamelistRepository(dbName string, forceMigrate bool, dialector gorm.Dialector) GamelistRepository {
+func NewGamelistRepository(dbName string, dialector gorm.Dialector) GamelistRepository {
 	var db *gorm.DB
 	var err error
 
-	if forceMigrate {
-		db, err = gorm.Open(dialector, &gorm.Config{})
-		if err != nil {
-			panic(ErrDbConnection)
-		}
-		db.AutoMigrate(&entity.GameProperties{}, &entity.Genre{},
-			&entity.Platform{}, &entity.Profile{}, &entity.RefreshToken{}, &entity.ProfileGame{},
-			&entity.Social{}, &entity.SocialType{}, &entity.ListType{})
-
-		err := db.Model(&entity.ListType{}).First(nil).Error
-		if err == gorm.ErrRecordNotFound {
-			log.Println("Creating default list types...")
-			listTypes := []entity.ListType{
-				{Name: "Played"},
-				{Name: "Playing"},
-				{Name: "Want to play"},
-			}
-
-			db.Create(&listTypes)
-		} else if err != nil {
-			panic("Failed to get first list type")
-		}
-	} else {
-		db, err = gorm.Open(dialector, &gorm.Config{})
-		if err != nil {
-			panic(ErrDbConnection)
-		}
+	db, err = gorm.Open(dialector, &gorm.Config{})
+	if err != nil {
+		panic(ErrDbConnection)
 	}
 
 	return &gameListRepository{

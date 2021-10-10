@@ -14,7 +14,6 @@ import (
 type ServerOptions struct {
 	Production         bool
 	ServeStatic        bool
-	ForceMigrate       bool
 	ForceScrape        bool
 	StaticDir          string
 	DatabaseDist       string
@@ -27,16 +26,12 @@ type ServerOptions struct {
 }
 
 func NewServer(options ServerOptions) *gin.Engine {
-	if options.ForceMigrate {
-		log.Println("Force migration.")
-	}
-
 	var (
 		// DB dialector init
 		dialector = repository.NewDBDialector(options.DBConfig)
 
 		// Repos
-		gamelistRepository repository.GamelistRepository = repository.NewGamelistRepository(options.DatabaseDist, options.ForceMigrate, dialector)
+		gamelistRepository repository.GamelistRepository = repository.NewGamelistRepository(options.DatabaseDist, dialector)
 
 		// Services
 		gamelistService service.GameListService = service.NewGameListService(gamelistRepository, options.ScraperGRPCAddress)

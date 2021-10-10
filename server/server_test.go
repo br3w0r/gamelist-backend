@@ -58,7 +58,6 @@ func TestServer(t *testing.T) {
 	options := ServerOptions{
 		Production:         true,
 		ServeStatic:        false,
-		ForceMigrate:       false,
 		ForceScrape:        true,
 		ScraperAsync:       false,
 		DatabaseDist:       "./test.db",

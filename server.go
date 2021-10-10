@@ -12,7 +12,6 @@ var (
 	PORT                 string = helpers.GetEnvOrDefault("PORT", "8080")
 	PRODUCTION_MODE      string = helpers.GetEnvOrDefault("PRODUCTION_MODE", "0")
 	SERVE_STATIC         string = helpers.GetEnvOrDefault("SERVE_STATIC", "1")
-	FORCE_MIGRATE        string = helpers.GetEnvOrDefault("FORCE_MIGRATE", "0")
 	FORCE_SCRAPE         string = helpers.GetEnvOrDefault("FORCE_SCRAPE", "0")
 	STATIC_DIR           string = helpers.GetEnvOrDefault("STATIC_FOLDER", "../gamelist-frontend/gamelist/dist")
 	DATABASE_DIST        string = helpers.GetEnvOrDefault("DATABASE_DIST", "./gamelist.db")
@@ -38,7 +37,6 @@ func main() {
 	options := server.ServerOptions{
 		Production:         PRODUCTION_MODE == "1",
 		ServeStatic:        SERVE_STATIC == "1",
-		ForceMigrate:       FORCE_MIGRATE == "1",
 		ForceScrape:        FORCE_SCRAPE == "1",
 		StaticDir:          STATIC_DIR,
 		DatabaseDist:       DATABASE_DIST,

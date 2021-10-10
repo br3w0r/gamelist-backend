@@ -1,4 +1,6 @@
-.PHONY: build run test
+.PHONY: build run test migrate
+
+dbopt = "user=postgres password=pgpass sslmode=disable dbname=gamelist"
 
 build:
 	go build server.go
@@ -8,3 +10,9 @@ run:
 
 test:
 	go test ./...
+
+migrate:
+	goose -dir ./migrations postgres $(dbopt) up
+
+migrate-undo:
+	goose -dir ./migrations postgres $(dbopt) down

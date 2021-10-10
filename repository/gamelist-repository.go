@@ -181,7 +181,7 @@ func (r *gameListRepository) GetGameDetails(nickname string, gameId uint64) (*en
 		return nil, err
 	}
 
-	err = r.db.Table("genre").Select("genres.name").
+	err = r.db.Table("genre").Select("genre.name").
 		Joins("inner join game_genres on game_genres.game_properties_id = ? and game_genres.genre_id = genre.id", gameId).
 		Scan(&(gameDetails.Genres)).Error
 

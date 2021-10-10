@@ -152,7 +152,7 @@ func (r *gameListRepository) GetAllGamesTyped(nickname string, last uint64, batc
 	}
 	var games []entity.TypedGameListProperties
 	r.db.Table("game_properties").
-		Joins("left join profile_games on game_properties.id = profile_games.game_id and profile_games.profile_id = ?", userId).
+		Joins("left join profile_game on game_properties.id = profile_game.game_id and profile_game.profile_id = ?", userId).
 		Where("game_properties.id > ?", last).
 		Limit(batchSize).
 		Scan(&games)
@@ -163,11 +163,11 @@ func (r *gameListRepository) GetAllGamesTyped(nickname string, last uint64, batc
 func (r *gameListRepository) GetUserGameList(nickname string) []entity.TypedGameListProperties {
 	var games []entity.TypedGameListProperties
 	r.db.Table("game_properties").Select(
-		"game_properties.id, game_properties.name, game_properties.image_url, game_properties.year_released, profile_games.list_type_id",
+		"game_properties.id, game_properties.name, game_properties.image_url, game_properties.year_released, profile_game.list_type_id",
 	).Joins(
-		"join profile_games on game_properties.id = profile_games.game_id and profile_games.list_type_id != 0",
+		"join profile_game on game_properties.id = profile_game.game_id and profile_game.list_type_id != 0",
 	).Joins(
-		"join profiles on profile_games.profile_id = profiles.id and profiles.nickname = ?",
+		"join profile on profile_game.profile_id = profile.id and profile.nickname = ?",
 		nickname,
 	).Scan(&games)
 	return games
@@ -188,7 +188,7 @@ func (r *gameListRepository) GetGameDetails(nickname string, gameId uint64) (*en
 	}
 	var gameDetails entity.GameDetailsResponse
 	err = r.db.Table("game_properties").
-		Joins("left join profile_games on game_properties.id = profile_games.game_id and profile_games.profile_id = ?", userId).
+		Joins("left join profile_game on game_properties.id = profile_game.game_id and profile_game.profile_id = ?", userId).
 		Where("game_properties.id = ?", gameId).
 		Scan(&(gameDetails.Game)).Error
 
@@ -198,16 +198,16 @@ func (r *gameListRepository) GetGameDetails(nickname string, gameId uint64) (*en
 	if err != nil {
 		return nil, err
 	}
-	err = r.db.Table("platforms").Select("platforms.name").
-		Joins("inner join game_platforms on game_platforms.game_properties_id = ? and game_platforms.platform_id = platforms.id", gameId).
+	err = r.db.Table("platform").Select("platform.name").
+		Joins("inner join game_platforms on game_platforms.game_properties_id = ? and game_platforms.platform_id = platform.id", gameId).
 		Scan(&(gameDetails.Platforms)).Error
 
 	if err != nil {
 		return nil, err
 	}
 
-	err = r.db.Table("genres").Select("genres.name").
-		Joins("inner join game_genres on game_genres.game_properties_id = ? and game_genres.genre_id = genres.id", gameId).
+	err = r.db.Table("genre").Select("genres.name").
+		Joins("inner join game_genres on game_genres.game_properties_id = ? and game_genres.genre_id = genre.id", gameId).
 		Scan(&(gameDetails.Genres)).Error
 
 	if err != nil {
@@ -333,11 +333,11 @@ func (r *gameListRepository) SaveRefreshToken(nickname string, tokenString strin
 
 func (r *gameListRepository) FindRefreshToken(nickname string, tokenString string) error {
 	var result []entity.RefreshToken
-	err := r.db.Table("refresh_tokens, profiles").Select("refresh_tokens.token").Where(
-		"refresh_tokens.token = ?", tokenString).Where(
-		"refresh_tokens.profile_id = profiles.id").Where(
-		"profiles.nickname = ?", nickname).Where(
-		"refresh_tokens.deleted_at IS NULL").Scan(&result).Error
+	err := r.db.Table("refresh_token, profile").Select("refresh_token.token").Where(
+		"refresh_token.token = ?", tokenString).Where(
+		"refresh_token.profile_id = profile.id").Where(
+		"profile.nickname = ?", nickname).Where(
+		"refresh_token.deleted_at IS NULL").Scan(&result).Error
 
 	if err != nil {
 		return err
@@ -374,7 +374,7 @@ func (r *gameListRepository) GetAllSocialTypes() []entity.SocialType {
 
 func (r *gameListRepository) findUserIDByNickname(nickname string) (uint64, error) {
 	var userID uint64
-	err := r.db.Table("profiles").Select("id").Take(&userID, map[string]string{"nickname": nickname}).Error
+	err := r.db.Table("profile").Select("id").Take(&userID, map[string]string{"nickname": nickname}).Error
 	if err != nil {
 		return 0, fmt.Errorf("unable to find user with given nickname: %v", err)
 	}

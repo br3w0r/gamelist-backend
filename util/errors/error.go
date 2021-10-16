@@ -29,6 +29,10 @@ func (e *Error) Cause() error {
 	return e.cause
 }
 
+func (e *Error) Code() errorCode {
+	return e.code
+}
+
 func (e *Error) MarshalJSON() (res []byte, err error) {
 	jsonErr := struct {
 		Code    int    `json:"code"`

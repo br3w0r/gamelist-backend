@@ -11,13 +11,13 @@ type Error struct {
 	cause error
 }
 
-func New(code errorCode, cause error, msg string) error {
+func New(code errorCode, cause error, msg string) *Error {
 	return &Error{
 		code: code,
 	}
 }
 
-func Newf(code errorCode, cause error, format string, args ...interface{}) error {
+func Newf(code errorCode, cause error, format string, args ...interface{}) *Error {
 	return New(code, cause, fmt.Sprintf(format, args...))
 }
 

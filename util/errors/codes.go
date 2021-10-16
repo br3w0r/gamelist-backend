@@ -6,7 +6,7 @@ type errorCode uint8
 
 const (
 	NotFound errorCode = 1
-	BadRequest errorCode = 2
+	BadInput errorCode = 2
 	Internal errorCode = 3
 	Timeout errorCode = 4
 	Unauthorized = 5
@@ -17,7 +17,7 @@ func (c errorCode) ToHTTP() int {
 	switch c {
 	case NotFound:
 		return http.StatusNotFound
-	case BadRequest:
+	case BadInput:
 		return http.StatusBadRequest
 	case Internal:
 		return http.StatusInternalServerError

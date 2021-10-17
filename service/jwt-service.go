@@ -87,7 +87,7 @@ func (s *jwtService) GenerateTokens(user string) (*entity.TokenPair, error) {
 
 	refreshTokenString, err := refreshToken.SignedString(refreshKey)
 	if err != nil {
-		return nil, utilErrs.New(utilErrs.Internal, err, "failed to generate token string")
+		return nil, utilErrs.New(utilErrs.Internal, err, "failed to generate refresh token string")
 	}
 
 	err = s.repo.SaveRefreshToken(user, refreshTokenString)

@@ -146,7 +146,7 @@ func (s *gameListService) CheckLogin(login entity.LoginProfile) (*entity.Profile
 
 	err = bcrypt.CompareHashAndPassword([]byte(profile.Password), []byte(login.Password))
 	if err != nil {
-		return nil, utilErrs.New(utilErrs.Unauthorized, err, "hash check failed")
+		return nil, utilErrs.New(utilErrs.Unauthorized, err, "incorrect password")
 	}
 
 	return profile, nil

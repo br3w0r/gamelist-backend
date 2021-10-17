@@ -105,11 +105,12 @@ func (mr *MockGamelistRepositoryMockRecorder) FindRefreshToken(arg0, arg1 interf
 }
 
 // GetAllGames mocks base method.
-func (m *MockGamelistRepository) GetAllGames() []entity.GameProperties {
+func (m *MockGamelistRepository) GetAllGames() ([]entity.GameProperties, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllGames")
 	ret0, _ := ret[0].([]entity.GameProperties)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetAllGames indicates an expected call of GetAllGames.
@@ -119,11 +120,12 @@ func (mr *MockGamelistRepositoryMockRecorder) GetAllGames() *gomock.Call {
 }
 
 // GetAllGamesTyped mocks base method.
-func (m *MockGamelistRepository) GetAllGamesTyped(arg0 string, arg1 uint64, arg2 int) []entity.TypedGameListProperties {
+func (m *MockGamelistRepository) GetAllGamesTyped(arg0 string, arg1 uint64, arg2 int) ([]entity.TypedGameListProperties, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllGamesTyped", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]entity.TypedGameListProperties)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetAllGamesTyped indicates an expected call of GetAllGamesTyped.
@@ -133,11 +135,12 @@ func (mr *MockGamelistRepositoryMockRecorder) GetAllGamesTyped(arg0, arg1, arg2 
 }
 
 // GetAllGenres mocks base method.
-func (m *MockGamelistRepository) GetAllGenres() []entity.Genre {
+func (m *MockGamelistRepository) GetAllGenres() ([]entity.Genre, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllGenres")
 	ret0, _ := ret[0].([]entity.Genre)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetAllGenres indicates an expected call of GetAllGenres.
@@ -147,11 +150,12 @@ func (mr *MockGamelistRepositoryMockRecorder) GetAllGenres() *gomock.Call {
 }
 
 // GetAllListTypes mocks base method.
-func (m *MockGamelistRepository) GetAllListTypes() []entity.ListType {
+func (m *MockGamelistRepository) GetAllListTypes() ([]entity.ListType, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllListTypes")
 	ret0, _ := ret[0].([]entity.ListType)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetAllListTypes indicates an expected call of GetAllListTypes.
@@ -161,11 +165,12 @@ func (mr *MockGamelistRepositoryMockRecorder) GetAllListTypes() *gomock.Call {
 }
 
 // GetAllPlatforms mocks base method.
-func (m *MockGamelistRepository) GetAllPlatforms() []entity.Platform {
+func (m *MockGamelistRepository) GetAllPlatforms() ([]entity.Platform, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllPlatforms")
 	ret0, _ := ret[0].([]entity.Platform)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetAllPlatforms indicates an expected call of GetAllPlatforms.
@@ -175,11 +180,12 @@ func (mr *MockGamelistRepositoryMockRecorder) GetAllPlatforms() *gomock.Call {
 }
 
 // GetAllProfiles mocks base method.
-func (m *MockGamelistRepository) GetAllProfiles() []entity.ProfileInfo {
+func (m *MockGamelistRepository) GetAllProfiles() ([]entity.ProfileInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllProfiles")
 	ret0, _ := ret[0].([]entity.ProfileInfo)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetAllProfiles indicates an expected call of GetAllProfiles.
@@ -189,11 +195,12 @@ func (mr *MockGamelistRepositoryMockRecorder) GetAllProfiles() *gomock.Call {
 }
 
 // GetAllSocialTypes mocks base method.
-func (m *MockGamelistRepository) GetAllSocialTypes() []entity.SocialType {
+func (m *MockGamelistRepository) GetAllSocialTypes() ([]entity.SocialType, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllSocialTypes")
 	ret0, _ := ret[0].([]entity.SocialType)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetAllSocialTypes indicates an expected call of GetAllSocialTypes.
@@ -233,11 +240,12 @@ func (mr *MockGamelistRepositoryMockRecorder) GetProfile(arg0 interface{}) *gomo
 }
 
 // GetUserGameList mocks base method.
-func (m *MockGamelistRepository) GetUserGameList(arg0 string) []entity.TypedGameListProperties {
+func (m *MockGamelistRepository) GetUserGameList(arg0 string) ([]entity.TypedGameListProperties, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserGameList", arg0)
 	ret0, _ := ret[0].([]entity.TypedGameListProperties)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetUserGameList indicates an expected call of GetUserGameList.
@@ -345,11 +353,12 @@ func (mr *MockGamelistRepositoryMockRecorder) SaveSocialType(arg0 interface{}) *
 }
 
 // SearchGames mocks base method.
-func (m *MockGamelistRepository) SearchGames(arg0 string) []entity.GameSearchResult {
+func (m *MockGamelistRepository) SearchGames(arg0 string) ([]entity.GameSearchResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SearchGames", arg0)
 	ret0, _ := ret[0].([]entity.GameSearchResult)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // SearchGames indicates an expected call of SearchGames.

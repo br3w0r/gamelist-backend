@@ -1,13 +1,13 @@
 package service
 
 import (
-	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
 
 	"github.com/br3w0r/gamelist-backend/entity"
 	"github.com/br3w0r/gamelist-backend/repository"
+	utilErrs "github.com/br3w0r/gamelist-backend/util/errors"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -72,7 +72,7 @@ func (s *jwtService) GenerateTokens(user string) (*entity.TokenPair, error) {
 
 	tokenString, err := token.SignedString(key)
 	if err != nil {
-		return nil, err
+		return nil, utilErrs.New(utilErrs.Internal, err, "failed to generate token string")
 	}
 
 	refreshKid := rand.Intn(10)
@@ -87,7 +87,7 @@ func (s *jwtService) GenerateTokens(user string) (*entity.TokenPair, error) {
 
 	refreshTokenString, err := refreshToken.SignedString(refreshKey)
 	if err != nil {
-		return nil, err
+		return nil, utilErrs.New(utilErrs.Internal, err, "failed to generate token string")
 	}
 
 	err = s.repo.SaveRefreshToken(user, refreshTokenString)
@@ -137,10 +137,10 @@ func (s *jwtService) DeleteAllUserRefreshTokens(nickname string) error {
 func (s *jwtService) validateToken(tokenString string, isRefresh bool) (string, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			return nil, utilErrs.Newf(utilErrs.BadInput, nil, "invalid signing method: %v", token.Header["alg"])
 		}
 		if err := token.Claims.Valid(); err != nil {
-			fmt.Println("Claims validation error: ", err)
+			return nil, utilErrs.New(utilErrs.BadInput, err, "failed to validate claims")
 		}
 
 		claims := token.Claims.(jwt.MapClaims)
@@ -163,5 +163,10 @@ func (s *jwtService) validateToken(tokenString string, isRefresh bool) (string, 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return claims["sub"].(string), nil
 	}
+	
+	if !token.Valid {
+		return "", utilErrs.New(utilErrs.Unauthorized, nil, "token validation failed")
+	}
+	
 	return "", err
 }

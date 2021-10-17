@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/br3w0r/gamelist-backend/entity"
+	utilErrs "github.com/br3w0r/gamelist-backend/util/errors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -11,25 +12,25 @@ import (
 
 type GamelistRepository interface {
 	SaveGame(game entity.GameProperties) error
-	GetAllGames() []entity.GameProperties
-	GetAllGamesTyped(nickname string, last uint64, batchSize int) []entity.TypedGameListProperties
-	GetUserGameList(nickname string) []entity.TypedGameListProperties
-	SearchGames(name string) []entity.GameSearchResult
+	GetAllGames() ([]entity.GameProperties, error)
+	GetAllGamesTyped(nickname string, last uint64, batchSize int) ([]entity.TypedGameListProperties, error)
+	GetUserGameList(nickname string) ([]entity.TypedGameListProperties, error)
+	SearchGames(name string) ([]entity.GameSearchResult, error)
 	GetGameDetails(nickname string, id uint64) (*entity.GameDetailsResponse, error)
 
 	CreateListType(listType entity.ListType) error
-	GetAllListTypes() []entity.ListType
+	GetAllListTypes() ([]entity.ListType, error)
 	ListGame(nickname string, gameId uint64, listType uint64) error
 
 	SaveGenre(genre entity.Genre) error
-	GetAllGenres() []entity.Genre
+	GetAllGenres() ([]entity.Genre, error)
 
 	SavePlatform(platform entity.Platform) error
-	GetAllPlatforms() []entity.Platform
+	GetAllPlatforms() ([]entity.Platform, error)
 
 	CreateProfile(profile entity.Profile) error
 	SaveProfile(profile entity.Profile) error
-	GetAllProfiles() []entity.ProfileInfo
+	GetAllProfiles() ([]entity.ProfileInfo, error)
 	GetProfile(login entity.ProfileCreds) (*entity.Profile, error)
 
 	SaveRefreshToken(nickname string, tokenString string) error
@@ -38,7 +39,7 @@ type GamelistRepository interface {
 	DeleteAllUserRefreshTokens(nickname string) error
 
 	SaveSocialType(socialType entity.SocialType) error
-	GetAllSocialTypes() []entity.SocialType
+	GetAllSocialTypes() ([]entity.SocialType, error)
 }
 
 type gameListRepository struct {
@@ -98,62 +99,95 @@ func (r *gameListRepository) SaveGame(game entity.GameProperties) error {
 	for i := range game.Platforms {
 		err := r.db.First(&game.Platforms[i], game.Platforms[i]).Error
 		if err != nil && err != gorm.ErrRecordNotFound {
-			return err
+			return utilErrs.FromGORM(err,
+				fmt.Sprintf("couldn't find platform with id %d and name %s",
+					game.Platforms[i].ID, game.Platforms[i].Name,
+				))
 		}
 	}
 	for i := range game.Genres {
 		err := r.db.First(&game.Genres[i], game.Genres[i]).Error
 		if err != nil && err != gorm.ErrRecordNotFound {
-			return err
+			return utilErrs.FromGORM(err,
+				fmt.Sprintf("couldn't find genre with id %d and name %s",
+					game.Genres[i].ID, game.Genres[i].Name,
+				))
 		}
 	}
-	return r.db.Save(&game).Error
+
+	err := r.db.Save(&game).Error
+	if err != nil {
+		return utilErrs.FromGORM(err, "failed to save game")
+	}
+
+	return nil
 }
 
-func (r *gameListRepository) GetAllGames() []entity.GameProperties {
+func (r *gameListRepository) GetAllGames() ([]entity.GameProperties, error) {
 	var games []entity.GameProperties
-	r.db.Preload(clause.Associations).Find(&games)
-	return games
+	err := r.db.Preload(clause.Associations).Find(&games).Error
+	if err != nil {
+		return nil, utilErrs.FromGORM(err, "failed to get games")
+	}
+
+	return games, nil
 }
 
-func (r *gameListRepository) GetAllGamesTyped(nickname string, last uint64, batchSize int) []entity.TypedGameListProperties {
+func (r *gameListRepository) GetAllGamesTyped(nickname string, last uint64, batchSize int) ([]entity.TypedGameListProperties, error) {
 	if batchSize > GAMES_BATCH_SIZE_LIMIT {
 		batchSize = GAMES_BATCH_SIZE_LIMIT
 	}
 
 	userId, err := r.findUserIDByNickname(nickname)
 	if err != nil {
-		return nil
+		return nil, err
 	}
+
 	var games []entity.TypedGameListProperties
-	r.db.Table("game_properties").
+	err = r.db.Table("game_properties").
 		Joins("left join profile_game on game_properties.id = profile_game.game_id and profile_game.profile_id = ?", userId).
 		Where("game_properties.id > ?", last).
 		Limit(batchSize).
-		Scan(&games)
+		Scan(&games).Error
 
-	return games
+	if err != nil {
+		return nil, utilErrs.FromGORM(err, "failed to get games")
+	}
+
+	return games, nil
 }
 
-func (r *gameListRepository) GetUserGameList(nickname string) []entity.TypedGameListProperties {
+func (r *gameListRepository) GetUserGameList(nickname string) ([]entity.TypedGameListProperties, error) {
 	var games []entity.TypedGameListProperties
-	r.db.Table("game_properties").Select(
+	err := r.db.Table("game_properties").Select(
 		"game_properties.id, game_properties.name, game_properties.image_url, game_properties.year_released, profile_game.list_type_id",
 	).Joins(
 		"join profile_game on game_properties.id = profile_game.game_id and profile_game.list_type_id != 0",
 	).Joins(
 		"join profile on profile_game.profile_id = profile.id and profile.nickname = ?",
 		nickname,
-	).Scan(&games)
-	return games
+	).Scan(&games).Error
+
+	if err != nil {
+		return nil, utilErrs.FromGORM(err, "failed to get user game list")
+	}
+
+	return games, nil
 }
 
-func (r *gameListRepository) SearchGames(name string) []entity.GameSearchResult {
+func (r *gameListRepository) SearchGames(name string) ([]entity.GameSearchResult, error) {
 	var games []entity.GameSearchResult
 	if len(name) > 1 {
-		r.db.Table("game_properties").Where("name LIKE ?", name+"%").Limit(10).Find(&games)
+		err := r.db.Table("game_properties").
+			Where("name LIKE ?", name+"%").
+			Limit(10).
+			Find(&games).Error
+
+		if err != nil {
+			return nil, utilErrs.FromGORM(err, "failed to search games")
+		}
 	}
-	return games
+	return games, nil
 }
 
 func (r *gameListRepository) GetGameDetails(nickname string, gameId uint64) (*entity.GameDetailsResponse, error) {
@@ -165,20 +199,18 @@ func (r *gameListRepository) GetGameDetails(nickname string, gameId uint64) (*en
 	err = r.db.Table("game_properties").
 		Joins("left join profile_game on game_properties.id = profile_game.game_id and profile_game.profile_id = ?", userId).
 		Where("game_properties.id = ?", gameId).
+		Limit(1).
 		Scan(&(gameDetails.Game)).Error
 
-	if gameDetails.Game.ID == 0 {
-		return nil, gorm.ErrRecordNotFound
-	}
 	if err != nil {
-		return nil, err
+		return nil, utilErrs.FromGORM(err, "failed to get game")
 	}
 	err = r.db.Table("platform").Select("platform.name").
 		Joins("inner join game_platforms on game_platforms.game_properties_id = ? and game_platforms.platform_id = platform.id", gameId).
 		Scan(&(gameDetails.Platforms)).Error
 
 	if err != nil {
-		return nil, err
+		return nil, utilErrs.FromGORM(err, "failed to get game's platforms")
 	}
 
 	err = r.db.Table("genre").Select("genre.name").
@@ -186,20 +218,29 @@ func (r *gameListRepository) GetGameDetails(nickname string, gameId uint64) (*en
 		Scan(&(gameDetails.Genres)).Error
 
 	if err != nil {
-		return nil, err
+		return nil, utilErrs.FromGORM(err, "failed to get game's genres")
 	}
 
 	return &gameDetails, nil
 }
 
 func (r *gameListRepository) CreateListType(listType entity.ListType) error {
-	return r.db.Create(&listType).Error
+	err := r.db.Create(&listType).Error
+	if err != nil {
+		return utilErrs.FromGORM(err, "failed to create list type")
+	}
+
+	return nil
 }
 
-func (r *gameListRepository) GetAllListTypes() []entity.ListType {
+func (r *gameListRepository) GetAllListTypes() ([]entity.ListType, error) {
 	var types []entity.ListType
-	r.db.Find(&types)
-	return types
+	err := r.db.Find(&types).Error
+	if err != nil {
+		return nil, utilErrs.FromGORM(err, "failed to get list types")
+	}
+
+	return types, nil
 }
 
 func (r *gameListRepository) ListGame(nickname string, gameId uint64, listType uint64) error {
@@ -209,20 +250,14 @@ func (r *gameListRepository) ListGame(nickname string, gameId uint64, listType u
 	}
 
 	err = r.db.First(&entity.GameProperties{}, gameId).Error
-	if err == gorm.ErrRecordNotFound {
-		return fmt.Errorf("couldn't find game with id: %d", gameId)
-	}
 	if err != nil {
-		return err
+		return utilErrs.FromGORM(err, fmt.Sprint("couldn't find game with id: ", gameId))
 	}
 
 	if listType != 0 {
 		err = r.db.First(&entity.ListType{}, listType).Error
-		if err == gorm.ErrRecordNotFound {
-			return fmt.Errorf("couldn't find list type with id: %d", listType)
-		}
 		if err != nil {
-			return err
+			return utilErrs.FromGORM(err, fmt.Sprint("couldn't find list type with id: ", listType))
 		}
 	}
 
@@ -232,27 +267,50 @@ func (r *gameListRepository) ListGame(nickname string, gameId uint64, listType u
 		ListTypeID: listType,
 	}
 
-	return r.db.Save(&listGame).Error
+	err = r.db.Save(&listGame).Error
+	if err != nil {
+		return utilErrs.FromGORM(err, "failed to save changes")
+	}
+
+	return nil
 }
 
 func (r *gameListRepository) SaveGenre(genre entity.Genre) error {
-	return r.db.Save(&genre).Error
+	err := r.db.Save(&genre).Error
+	if err != nil {
+		return utilErrs.FromGORM(err, "failed to save genre")
+	}
+
+	return nil
 }
 
-func (r *gameListRepository) GetAllGenres() []entity.Genre {
+func (r *gameListRepository) GetAllGenres() ([]entity.Genre, error) {
 	var genres []entity.Genre
-	r.db.Find(&genres)
-	return genres
+	err := r.db.Find(&genres).Error
+	if err != nil {
+		return nil, utilErrs.FromGORM(err, "failed to get genres")
+	}
+
+	return genres, nil
 }
 
 func (r *gameListRepository) SavePlatform(platform entity.Platform) error {
-	return r.db.Save(&platform).Error
+	err := r.db.Save(&platform).Error
+	if err != nil {
+		return utilErrs.FromGORM(err, "failed to save platform")
+	}
+
+	return nil
 }
 
-func (r *gameListRepository) GetAllPlatforms() []entity.Platform {
+func (r *gameListRepository) GetAllPlatforms() ([]entity.Platform, error) {
 	var platforms []entity.Platform
-	r.db.Find(&platforms)
-	return platforms
+	err := r.db.Find(&platforms).Error
+	if err != nil {
+		return nil, utilErrs.FromGORM(err, "failed to get platforms")
+	}
+
+	return platforms, nil
 }
 
 func (r *gameListRepository) CreateProfile(profile entity.Profile) error {
@@ -262,7 +320,12 @@ func (r *gameListRepository) CreateProfile(profile entity.Profile) error {
 
 	profile.GamesListed = 0
 
-	return r.db.Create(&profile).Error
+	err := r.db.Create(&profile).Error
+	if err != nil {
+		return utilErrs.FromGORM(err, "failed to create profile")
+	}
+
+	return nil
 }
 
 func (r *gameListRepository) SaveProfile(profile entity.Profile) error {
@@ -270,21 +333,31 @@ func (r *gameListRepository) SaveProfile(profile entity.Profile) error {
 		return err
 	}
 
-	return r.db.Save(&profile).Error
+	err := r.db.Save(&profile).Error
+	if err != nil {
+		return utilErrs.FromGORM(err, "failed to save profile")
+	}
+
+	return nil
 }
 
-func (r *gameListRepository) GetAllProfiles() []entity.ProfileInfo {
+func (r *gameListRepository) GetAllProfiles() ([]entity.ProfileInfo, error) {
 	var profiles []entity.ProfileInfo
-	r.db.Model(&entity.Profile{}).Find(&profiles)
-	return profiles
+	err := r.db.Model(&entity.Profile{}).Find(&profiles).Error
+	if err != nil {
+		return nil, utilErrs.FromGORM(err, "failed to get profiles")
+	}
+
+	return profiles, nil
 }
 
 func (r *gameListRepository) GetProfile(login entity.ProfileCreds) (*entity.Profile, error) {
 	var profile entity.Profile
 	err := r.db.First(&profile, login).Error
 	if err != nil {
-		return nil, err
+		return nil, utilErrs.FromGORM(err, "failed to get profile")
 	}
+
 	return &profile, nil
 }
 
@@ -301,8 +374,9 @@ func (r *gameListRepository) SaveRefreshToken(nickname string, tokenString strin
 
 	err = r.db.Create(&refreshToken).Error
 	if err != nil {
-		return fmt.Errorf("unable to save the refresh token: %v", err)
+		return utilErrs.FromGORM(err, "unable to save the refresh token")
 	}
+
 	return nil
 }
 
@@ -312,20 +386,24 @@ func (r *gameListRepository) FindRefreshToken(nickname string, tokenString strin
 		"refresh_token.token = ?", tokenString).Where(
 		"refresh_token.profile_id = profile.id").Where(
 		"profile.nickname = ?", nickname).Where(
-		"refresh_token.deleted_at IS NULL").Scan(&result).Error
+		"refresh_token.deleted_at IS NULL").
+		Limit(1).
+		Scan(&result).Error
 
 	if err != nil {
-		return err
+		return utilErrs.FromGORM(err, "failed to find refresh token")
 	}
 
-	if len(result) == 0 {
-		return gorm.ErrRecordNotFound
-	}
 	return nil
 }
 
 func (r *gameListRepository) DeleteRefreshToken(tokenString string) error {
-	return r.db.Where("token = ?", tokenString).Delete(&entity.RefreshToken{}).Error
+	err := r.db.Where("token = ?", tokenString).Delete(&entity.RefreshToken{}).Error
+	if err != nil {
+		return utilErrs.FromGORM(err, "failed to delete refresh token")
+	}
+
+	return nil
 }
 
 func (r *gameListRepository) DeleteAllUserRefreshTokens(nickname string) error {
@@ -334,24 +412,40 @@ func (r *gameListRepository) DeleteAllUserRefreshTokens(nickname string) error {
 		return err
 	}
 
-	return r.db.Where("profile_id = ?", userID).Delete(&entity.RefreshToken{}).Error
+	err = r.db.Where("profile_id = ?", userID).Delete(&entity.RefreshToken{}).Error
+	if err != nil {
+		return utilErrs.FromGORM(err, "failed to delete refresh token")
+	}
+
+	return nil
 }
 
 func (r *gameListRepository) SaveSocialType(socialType entity.SocialType) error {
-	return r.db.Save(&socialType).Error
+	err := r.db.Save(&socialType).Error
+	if err != nil {
+		return utilErrs.FromGORM(err, "failed to save social type")
+	}
+	
+	return nil
 }
 
-func (r *gameListRepository) GetAllSocialTypes() []entity.SocialType {
+func (r *gameListRepository) GetAllSocialTypes() ([]entity.SocialType, error) {
 	var socialTypes []entity.SocialType
-	r.db.Find(&socialTypes)
-	return socialTypes
+	
+	err := r.db.Find(&socialTypes).Error
+	if err != nil {
+		return nil, utilErrs.FromGORM(err, "failed to find social types")
+	}
+	
+	return socialTypes, nil
 }
 
 func (r *gameListRepository) findUserIDByNickname(nickname string) (uint64, error) {
 	var userID uint64
 	err := r.db.Table("profile").Select("id").Take(&userID, map[string]string{"nickname": nickname}).Error
 	if err != nil {
-		return 0, fmt.Errorf("unable to find user with given nickname: %v", err)
+		return 0, utilErrs.FromGORM(err, fmt.Sprintf("failed to find user with nickname \"%s\"", nickname))
 	}
+
 	return userID, nil
 }

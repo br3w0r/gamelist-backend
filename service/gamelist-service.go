@@ -9,35 +9,36 @@ import (
 	"github.com/br3w0r/gamelist-backend/entity"
 	pb "github.com/br3w0r/gamelist-backend/proto"
 	"github.com/br3w0r/gamelist-backend/repository"
+	utilErrs "github.com/br3w0r/gamelist-backend/util/errors"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 )
 
 type GameListService interface {
 	SaveGame(game entity.GameProperties) error
-	GetAllGames() []entity.GameProperties
-	GetAllGamesTyped(nickname string, last uint64, batchSize int) []entity.TypedGameListProperties
-	GetUserGameList(nickname string) []entity.TypedGameListProperties
-	SearchGames(name string) []entity.GameSearchResult
+	GetAllGames() ([]entity.GameProperties, error)
+	GetAllGamesTyped(nickname string, last uint64, batchSize int) ([]entity.TypedGameListProperties, error)
+	GetUserGameList(nickname string) ([]entity.TypedGameListProperties, error)
+	SearchGames(name string) ([]entity.GameSearchResult, error)
 	GetGameDetails(nickname string, gameId uint64) (*entity.GameDetailsResponse, error)
 
 	CreateListType(listType entity.ListType) error
-	GetAllListTypes() []entity.ListType
+	GetAllListTypes() ([]entity.ListType, error)
 	ListGame(nickname string, gameId uint64, listType uint64) error
 
 	SaveGenre(genre entity.Genre) error
-	GetAllGenres() []entity.Genre
+	GetAllGenres() ([]entity.Genre, error)
 
 	SavePlatform(platform entity.Platform) error
-	GetAllPlatforms() []entity.Platform
+	GetAllPlatforms() ([]entity.Platform, error)
 
 	CreateProfile(profile entity.Profile) error
 	SaveProfile(profile entity.Profile) error
-	GetAllProfiles() []entity.ProfileInfo
+	GetAllProfiles() ([]entity.ProfileInfo, error)
 	CheckLogin(login entity.LoginProfile) (*entity.Profile, error)
 
 	SaveSocialType(socialType entity.SocialType) error
-	GetAllSocialTypes() []entity.SocialType
+	GetAllSocialTypes() ([]entity.SocialType, error)
 
 	// gRPC
 	ScrapeGames()
@@ -56,19 +57,19 @@ func (s *gameListService) SaveGame(game entity.GameProperties) error {
 	return s.repo.SaveGame(game)
 }
 
-func (s *gameListService) GetAllGames() []entity.GameProperties {
+func (s *gameListService) GetAllGames() ([]entity.GameProperties, error) {
 	return s.repo.GetAllGames()
 }
 
-func (s *gameListService) GetAllGamesTyped(nickname string, last uint64, batchSize int) []entity.TypedGameListProperties {
+func (s *gameListService) GetAllGamesTyped(nickname string, last uint64, batchSize int) ([]entity.TypedGameListProperties, error) {
 	return s.repo.GetAllGamesTyped(nickname, last, batchSize)
 }
 
-func (s *gameListService) GetUserGameList(nickname string) []entity.TypedGameListProperties {
+func (s *gameListService) GetUserGameList(nickname string) ([]entity.TypedGameListProperties, error) {
 	return s.repo.GetUserGameList(nickname)
 }
 
-func (s *gameListService) SearchGames(name string) []entity.GameSearchResult {
+func (s *gameListService) SearchGames(name string) ([]entity.GameSearchResult, error) {
 	return s.repo.SearchGames(name)
 }
 
@@ -80,7 +81,7 @@ func (s *gameListService) CreateListType(listType entity.ListType) error {
 	return s.repo.CreateListType(listType)
 }
 
-func (s *gameListService) GetAllListTypes() []entity.ListType {
+func (s *gameListService) GetAllListTypes() ([]entity.ListType, error) {
 	return s.repo.GetAllListTypes()
 }
 
@@ -92,7 +93,7 @@ func (s *gameListService) SaveGenre(genre entity.Genre) error {
 	return s.repo.SaveGenre(genre)
 }
 
-func (s *gameListService) GetAllGenres() []entity.Genre {
+func (s *gameListService) GetAllGenres() ([]entity.Genre, error) {
 	return s.repo.GetAllGenres()
 }
 
@@ -100,7 +101,7 @@ func (s *gameListService) SavePlatform(platform entity.Platform) error {
 	return s.repo.SavePlatform(platform)
 }
 
-func (s *gameListService) GetAllPlatforms() []entity.Platform {
+func (s *gameListService) GetAllPlatforms() ([]entity.Platform, error) {
 	return s.repo.GetAllPlatforms()
 }
 
@@ -130,7 +131,7 @@ func (s *gameListService) SaveProfile(profile entity.Profile) error {
 	return s.repo.SaveProfile(profile)
 }
 
-func (s *gameListService) GetAllProfiles() []entity.ProfileInfo {
+func (s *gameListService) GetAllProfiles() ([]entity.ProfileInfo, error) {
 	return s.repo.GetAllProfiles()
 }
 
@@ -142,18 +143,20 @@ func (s *gameListService) CheckLogin(login entity.LoginProfile) (*entity.Profile
 	if err != nil {
 		return nil, err
 	}
+
 	err = bcrypt.CompareHashAndPassword([]byte(profile.Password), []byte(login.Password))
 	if err != nil {
-		return nil, err
+		return nil, utilErrs.New(utilErrs.Unauthorized, err, "incorrect password")
 	}
-	return profile, err
+
+	return profile, nil
 }
 
 func (s *gameListService) SaveSocialType(socialType entity.SocialType) error {
 	return s.repo.SaveSocialType(socialType)
 }
 
-func (s *gameListService) GetAllSocialTypes() []entity.SocialType {
+func (s *gameListService) GetAllSocialTypes() ([]entity.SocialType, error) {
 	return s.repo.GetAllSocialTypes()
 }
 

@@ -50,7 +50,7 @@ func findUser(repo repository.GamelistRepository, n uint64) {
 }
 
 func findGames(repo repository.GamelistRepository) {
-	games := repo.GetAllGames()
+	games, _ := repo.GetAllGames()
 
 	for _, game := range games {
 		name := game.Name[:len(game.Name)/2]

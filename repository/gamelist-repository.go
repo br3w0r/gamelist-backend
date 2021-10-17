@@ -2,12 +2,15 @@ package repository
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/br3w0r/gamelist-backend/entity"
 	utilErrs "github.com/br3w0r/gamelist-backend/util/errors"
+	utilLogger "github.com/br3w0r/gamelist-backend/util/logger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"gorm.io/gorm/logger"
 )
 
 type GamelistRepository interface {
@@ -81,11 +84,20 @@ func NewDBDialector(conf *DBConfig) gorm.Dialector {
 	return postgres.Open(dsn)
 }
 
-func NewGamelistRepository(dbName string, dialector gorm.Dialector) GamelistRepository {
-	var db *gorm.DB
-	var err error
+func NewGamelistRepository(dbName string, dialector gorm.Dialector, loggerConf logger.Config) GamelistRepository {
+	var (
+		db  *gorm.DB
+		err error
+	)
 
-	db, err = gorm.Open(dialector, &gorm.Config{})
+	logger := logger.New(
+		log.New(utilLogger.Logger, "", log.LstdFlags),
+		loggerConf,
+	)
+
+	db, err = gorm.Open(dialector, &gorm.Config{
+		Logger: logger,
+	})
 	if err != nil {
 		panic(ErrDbConnection)
 	}

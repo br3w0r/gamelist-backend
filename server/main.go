@@ -9,6 +9,7 @@ import (
 	"github.com/br3w0r/gamelist-backend/service"
 	test "github.com/br3w0r/gamelist-backend/test/stress"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm/logger"
 )
 
 type ServerOptions struct {
@@ -31,7 +32,14 @@ func NewServer(options ServerOptions) *gin.Engine {
 		dialector = repository.NewDBDialector(options.DBConfig)
 
 		// Repos
-		gamelistRepository repository.GamelistRepository = repository.NewGamelistRepository(options.DatabaseDist, dialector)
+		gamelistRepository repository.GamelistRepository = repository.NewGamelistRepository(
+			options.DatabaseDist, dialector,
+			logger.Config{
+				Colorful: true,
+				IgnoreRecordNotFoundError: true,
+				LogLevel: logger.Error,
+			},
+		)
 
 		// Services
 		gamelistService service.GameListService = service.NewGameListService(gamelistRepository, options.ScraperGRPCAddress)

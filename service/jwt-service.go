@@ -121,7 +121,10 @@ func (s *jwtService) RefreshTokens(refreshToken string) (*entity.TokenPair, erro
 		return nil, err
 	}
 
-	s.repo.DeleteRefreshToken(refreshToken)
+	err = s.repo.DeleteRefreshToken(refreshToken)
+	if err != nil {
+		return nil, err
+	}
 
 	return tokens, nil
 }
@@ -163,10 +166,10 @@ func (s *jwtService) validateToken(tokenString string, isRefresh bool) (string, 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return claims["sub"].(string), nil
 	}
-	
+
 	if !token.Valid {
 		return "", utilErrs.New(utilErrs.Unauthorized, nil, "token validation failed")
 	}
-	
+
 	return "", err
 }

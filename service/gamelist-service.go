@@ -161,6 +161,7 @@ func (s *gameListService) GetAllSocialTypes() ([]entity.SocialType, error) {
 }
 
 // gRPC
+//nolint Will be remade
 func (s *gameListService) ScrapeGames() {
 	// Connection
 	opts := []grpc.DialOption{grpc.WithInsecure(), grpc.WithBlock()}

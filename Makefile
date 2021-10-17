@@ -1,4 +1,4 @@
-.PHONY: build run test migrate
+.PHONY: build run test migrate migrate-undo fmt .build-lint
 
 dbopt = "user=postgres password=pgpass sslmode=disable dbname=gamelist"
 
@@ -16,3 +16,12 @@ migrate:
 
 migrate-undo:
 	goose -dir ./migrations postgres $(dbopt) down
+
+fmt:
+	go fmt ./...
+
+build-lint:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+lint:
+	golangci-lint run

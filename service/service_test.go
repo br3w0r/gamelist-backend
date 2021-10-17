@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	mockGameProperty = entity.GameProperties{
+	mockGameProperty = entity.GameProperties{ //nolint Incomplete test
 		Name: "Test Game",
 		Platforms: []entity.Platform{
 			{Name: "Test Platform"},
@@ -24,7 +24,7 @@ var (
 		},
 	}
 
-	mockGamePropertyArray = []entity.GameProperties{mockGameProperty}
+	mockGamePropertyArray = []entity.GameProperties{mockGameProperty} //nolint Incomplete test
 	mockProfile           = entity.Profile{
 		ProfileInfo: entity.ProfileInfo{
 			Nickname:    "test",

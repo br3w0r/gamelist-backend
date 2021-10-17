@@ -1,3 +1,4 @@
+//nolint Will be remade
 package test
 
 import (

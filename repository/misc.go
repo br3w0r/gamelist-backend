@@ -10,9 +10,9 @@ import (
 
 func CheckSocialTypes(db *gorm.DB, profile *entity.Profile) error {
 	for i := range profile.Socials {
-		err := db.First(&entity.SocialType{}, profile.Socials[i].TypeID).Error
-		if err != nil {
-			return utilErrs.FromGORM(err, fmt.Sprint("couldn't find social of type ", profile.Socials[i].TypeID))
+		res := db.First(&entity.SocialType{}, profile.Socials[i].TypeID)
+		if res.Error != nil {
+			return utilErrs.FromGORM(res, fmt.Sprint("couldn't find social of type ", profile.Socials[i].TypeID))
 		}
 	}
 	return nil

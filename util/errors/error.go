@@ -40,7 +40,7 @@ func (e *Error) Code() errorCode {
 
 func (e *Error) MarshalJSON() (res []byte, err error) {
 	var cause string
-	if e.code == Internal{
+	if e.code == Internal {
 		cause = ""
 	} else {
 		cause = fmt.Sprint(e.cause)

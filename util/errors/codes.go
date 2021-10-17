@@ -5,13 +5,32 @@ import "net/http"
 type errorCode uint8
 
 const (
-	NotFound errorCode = 1
-	BadInput errorCode = 2
-	Internal errorCode = 3
-	Timeout errorCode = 4
-	Unauthorized = 5
+	NotFound     errorCode = 1
+	BadInput     errorCode = 2
+	Internal     errorCode = 3
+	Timeout      errorCode = 4
+	Unauthorized errorCode = 5
 	AccessDenied errorCode = 6
 )
+
+func (c errorCode) String() string {
+	switch c {
+	case NotFound:
+		return "NOT_FOUND"
+	case BadInput:
+		return "BAD_INPUT"
+	case Internal:
+		return "INTERNAL"
+	case Timeout:
+		return "TIMEOUT"
+	case Unauthorized:
+		return "UNAUTHORIZED"
+	case AccessDenied:
+		return "ACCESS_DENIED"
+	}
+
+	return "Unknown"
+}
 
 func (c errorCode) ToHTTP() int {
 	switch c {

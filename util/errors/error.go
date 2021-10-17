@@ -3,17 +3,22 @@ package errors
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 type Error struct {
-	code  errorCode
-	msg   string
-	cause error
+	code      errorCode
+	msg       string
+	cause     error
+	timestamp int64
 }
 
 func New(code errorCode, cause error, msg string) *Error {
 	return &Error{
-		code: code,
+		code:      code,
+		cause:     cause,
+		msg:       msg,
+		timestamp: time.Now().Unix(),
 	}
 }
 
@@ -35,13 +40,15 @@ func (e *Error) Code() errorCode {
 
 func (e *Error) MarshalJSON() (res []byte, err error) {
 	jsonErr := struct {
-		Code    int    `json:"code"`
-		Message string `json:"message"`
-		Cause   string `json:"cause"`
+		Code      string `json:"code"`
+		Message   string `json:"message"`
+		Cause     string `json:"cause"`
+		Timestamp int64  `json:"timestamp"`
 	}{
-		Code:    int(e.code),
-		Message: e.msg,
-		Cause:   fmt.Sprint(e.cause),
+		Code:      e.code.String(),
+		Message:   e.msg,
+		Cause:     fmt.Sprint(e.cause),
+		Timestamp: e.timestamp,
 	}
 
 	res, err = json.Marshal(&jsonErr)

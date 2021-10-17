@@ -1,20 +1,19 @@
 package errors
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 func FromGORM(err error, msg string) *Error {
-	e := &Error{
-		msg: msg,
-		cause: err,
-	}
+	var code errorCode
 
 	if err == gorm.ErrRecordNotFound {
-		e.code = NotFound
+		code = NotFound
 	} else {
-		e.code = Internal
+		code = Internal
 	}
 
-	return e
+	return New(code, nil, msg)
 }
 
 func JSONParseErr(err error) *Error {

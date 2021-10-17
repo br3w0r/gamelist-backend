@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"strings"
 
 	"github.com/br3w0r/gamelist-backend/helpers"
@@ -59,6 +60,9 @@ func main() {
 	server := server.NewServer(options)
 
 	if !options.StressTest {
-		server.Run(":" + PORT)
+		err := server.Run(":" + PORT)
+		if err != nil {
+			log.Fatalf("failed to start server: %s", err)
+		}
 	}
 }

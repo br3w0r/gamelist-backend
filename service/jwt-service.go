@@ -121,7 +121,10 @@ func (s *jwtService) RefreshTokens(refreshToken string) (*entity.TokenPair, erro
 		return nil, err
 	}
 
-	s.repo.DeleteRefreshToken(refreshToken)
+	err = s.repo.DeleteRefreshToken(refreshToken)
+	if err != nil {
+		return nil, err
+	}
 
 	return tokens, nil
 }

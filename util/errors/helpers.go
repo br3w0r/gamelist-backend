@@ -15,7 +15,7 @@ func FromGORM(tx *gorm.DB, msg string) *Error {
 		code = Internal
 	}
 
-	return New(code, nil, msg)
+	return New(code, tx.Error, msg)
 }
 
 func JSONParseErr(err error) *Error {

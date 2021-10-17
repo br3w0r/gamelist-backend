@@ -29,7 +29,7 @@ func (c errorCode) String() string {
 		return "ACCESS_DENIED"
 	}
 
-	return "Unknown"
+	return "UNKNOWN"
 }
 
 func (c errorCode) ToHTTP() int {

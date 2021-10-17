@@ -93,6 +93,7 @@ func (c *gameListController) GetMyGameList(ctx *gin.Context) {
 	games, err := c.gamelistService.GetUserGameList(nickname)
 	if err != nil {
 		ErrorSender(ctx, err)
+		return
 	}
 
 	ctx.JSON(http.StatusOK, games)
@@ -156,6 +157,7 @@ func (c *gameListController) ListGame(ctx *gin.Context) {
 		ErrorSender(ctx, utilErrs.JSONParseErr(err))
 		return
 	}
+
 	err = c.gamelistService.ListGame(nickname, gameList.GameId, gameList.ListType)
 	if err != nil {
 		ErrorSender(ctx, err)
@@ -214,6 +216,7 @@ func (c *gameListController) AcquireJWTPair(ctx *gin.Context) {
 		ErrorSender(ctx, utilErrs.JSONParseErr(err))
 		return
 	}
+
 	profile, err := c.gamelistService.CheckLogin(login)
 	if err != nil {
 		ErrorSender(ctx, err)
@@ -251,10 +254,16 @@ func (c *gameListController) RevokeRefreshToken(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(&request)
 	if err != nil {
 		ErrorSender(ctx, utilErrs.JSONParseErr(err))
-	} else {
-		c.jwtService.RevokeRefreshToken(request.RefreshToken)
-		ResponseOK(ctx)
+		return
 	}
+
+	err = c.jwtService.RevokeRefreshToken(request.RefreshToken)
+	if err != nil {
+		ErrorSender(ctx, err)
+		return
+	}
+
+	ResponseOK(ctx)
 }
 
 func (c *gameListController) DeleteAllRefreshTokens(ctx *gin.Context) {

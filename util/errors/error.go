@@ -39,6 +39,13 @@ func (e *Error) Code() errorCode {
 }
 
 func (e *Error) MarshalJSON() (res []byte, err error) {
+	var cause string
+	if e.code == Internal {
+		cause = ""
+	} else {
+		cause = fmt.Sprint(e.cause)
+	}
+
 	jsonErr := struct {
 		Code      string `json:"code"`
 		Message   string `json:"message"`
@@ -47,7 +54,7 @@ func (e *Error) MarshalJSON() (res []byte, err error) {
 	}{
 		Code:      e.code.String(),
 		Message:   e.msg,
-		Cause:     fmt.Sprint(e.cause),
+		Cause:     cause,
 		Timestamp: e.timestamp,
 	}
 

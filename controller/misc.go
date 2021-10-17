@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	utilErrs "github.com/br3w0r/gamelist-backend/util/errors"
+	utilLogger "github.com/br3w0r/gamelist-backend/util/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,6 +27,10 @@ func ErrorSender(ctx *gin.Context, err error) {
 	}
 
 	ctx.AbortWithStatusJSON(utilErr.Code().ToHTTP(), utilErr)
+
+	if utilErr.Code() == utilErrs.Internal {
+		utilLogger.Logger.Write([]byte(fmt.Sprintf("INTERNAL ERROR: \"%s\"; cause: %v\n", utilErr.Error(), utilErr.Cause()))) //nolint:errcheck
+	}
 }
 
 func ResponseOK(ctx *gin.Context) {

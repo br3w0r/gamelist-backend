@@ -19,5 +19,5 @@ func FromGORM(tx *gorm.DB, msg string) *Error {
 }
 
 func JSONParseErr(err error) *Error {
-	return New(BadInput, err, "failed to parse request to json")
+	return Newf(BadInput, err, "failed to parse request to json: %v", err)
 }

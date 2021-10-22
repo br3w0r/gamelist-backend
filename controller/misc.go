@@ -26,7 +26,8 @@ func ErrorSender(ctx *gin.Context, err error) {
 		utilErr = utilErrs.New(utilErrs.Internal, err, "unknown error")
 	}
 
-	ctx.AbortWithStatusJSON(utilErr.Code().ToHTTP(), utilErr)
+	data := utilErr.JSON(true)
+	ctx.Data(utilErr.Code().ToHTTP(), "application/json", data)
 
 	if utilErr.Code() == utilErrs.Internal {
 		utilLogger.Logger.Write([]byte(fmt.Sprintf("INTERNAL ERROR: \"%s\"; cause: %v\n", utilErr.Error(), utilErr.Cause()))) //nolint:errcheck

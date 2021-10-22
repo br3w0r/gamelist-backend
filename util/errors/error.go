@@ -38,18 +38,19 @@ func (e *Error) Code() errorCode {
 	return e.code
 }
 
-func (e *Error) MarshalJSON() (res []byte, err error) {
+// JSON parses error to json format.
+//
+// If safe is true, cause will not be parsed
+func (e *Error) JSON(safe bool) []byte {
 	var cause string
-	if e.code == Internal {
-		cause = ""
-	} else {
+	if !safe {
 		cause = fmt.Sprint(e.cause)
 	}
 
 	jsonErr := struct {
 		Code      string `json:"code"`
 		Message   string `json:"message"`
-		Cause     string `json:"cause"`
+		Cause     string `json:"cause,omitempty"`
 		Timestamp int64  `json:"timestamp"`
 	}{
 		Code:      e.code.String(),
@@ -58,7 +59,7 @@ func (e *Error) MarshalJSON() (res []byte, err error) {
 		Timestamp: e.timestamp,
 	}
 
-	res, err = json.Marshal(&jsonErr)
+	res, _ := json.Marshal(&jsonErr)
 
-	return
+	return res
 }

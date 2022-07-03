@@ -1,0 +1,3 @@
+linters:
+  disable:
+    - structcheck # it's not supported on go 1.18 yet

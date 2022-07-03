@@ -25,7 +25,7 @@ var (
 	DB_NAME              string = helpers.GetEnvOrDefault("DB_NAME", "gamelist")
 	DB_PASSWORD          string = helpers.GetEnvOrDefault("DB_PASSWORD", "pgpass")
 	DB_SSL               string = helpers.GetEnvOrDefault("DB_SSL", "0")
-	DB_TIMEZONE          string = helpers.GetEnvOrDefault("DB_TIMEZONE", "")
+	DB_TIMEZONE          string = helpers.GetEnvOrDefault("DB_TIMEZONE", "UTC")
 )
 
 func main() {
